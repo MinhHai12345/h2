@@ -52,12 +52,19 @@ management:
 
 app:
   time-zone: ${APP_TIME_ZONE:UTC}
+  ingestion:
+    operations:
+      api-key: ${INGESTION_ADMIN_API_KEY:}
   providers:
     sofascore:
       enabled: ${SOFASCORE_ENABLED:false}
       web-url: ${SOFASCORE_WEB_URL:https://www.sofascore.com}
       region: ${SOFASCORE_REGION:VN}
       headless: ${SOFASCORE_HEADLESS:true}
+      browser-channel: ${SOFASCORE_BROWSER_CHANNEL:chrome}
+      profile-directory: ${SOFASCORE_PROFILE_DIRECTORY:.runtime/sofascore-profile}
+      navigation-timeout-millis: ${SOFASCORE_NAVIGATION_TIMEOUT_MILLIS:60000}
+      response-timeout-millis: ${SOFASCORE_RESPONSE_TIMEOUT_MILLIS:20000}
     understat:
       enabled: ${UNDERSTAT_ENABLED:false}
     football-data:

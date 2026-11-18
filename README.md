@@ -17,11 +17,14 @@ MMO remains the legacy/reference application. H2-Football uses a new repository 
 
 ## Local setup
 
-1. Copy `.env.example` to `.env` and set local credentials.
+1. Copy `.env.example` to `.env` and set local database credentials.
 2. Start MySQL: `docker compose up -d mysql`.
 3. Run the application with the `dev` profile using your IDE or `mvn spring-boot:run`.
+4. Keep all providers disabled until their browser/API prerequisites and credentials are configured.
 
-The project has intentionally not been compiled or tested as part of this scaffold delivery.
+For the first SofaScore ingestion flow, configure `SOFASCORE_ENABLED=true`, install the configured Playwright browser channel, set a private browser profile directory and configure a strong `INGESTION_ADMIN_API_KEY`. See [SofaScore master-data ingestion](docs/ingestion/sofascore-masterdata.md) for endpoint usage and current limitations.
+
+Compilation and tests have intentionally not been run during intermediate implementation steps. Run final verification only after the implementation batch is complete.
 
 ## Java formatting
 
@@ -58,7 +61,7 @@ The Git hook is installed once per clone; the workflow check runs in GitHub Acti
 
 ## Database safety
 
-The application connects to the `h2_football` schema by default. Never point this application at the legacy MMO schema during normal development. Hibernate schema generation is disabled; Flyway owns schema changes. The initial scaffold deliberately creates no business tables before the master-data and match model is approved.
+The application connects to the `h2_football` schema by default. Never point this application at the legacy MMO schema during normal development. Hibernate schema generation is disabled; Flyway owns schema changes.
 
 ## Modules
 
