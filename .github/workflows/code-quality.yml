@@ -7,15 +7,19 @@ on:
     branches: [ main ]
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   java-format:
-    name: Java format check
+    name: Java format
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+          ref: ${{ github.head_ref || github.ref_name }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Java 17
         uses: actions/setup-java@v4
@@ -24,5 +28,17 @@ jobs:
           java-version: '17'
           cache: maven
 
-      - name: Check Java formatting
+      - name: Apply Java formatting on pull requests
+        if: github.event_name == 'pull_request'
+        run: |
+          mvn --batch-mode --no-transfer-progress spotless:apply
+          if ! git diff --quiet -- '*.java'; then
+            git config user.name "github-actions[bot]"
+            git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+            git add -u -- '*.java'
+            git commit -m "style(java): apply google-java-format"
+            git push origin "HEAD:${{ github.head_ref }}"
+          fi
+
+      - name: Verify Java formatting
         run: mvn --batch-mode --no-transfer-progress spotless:check
