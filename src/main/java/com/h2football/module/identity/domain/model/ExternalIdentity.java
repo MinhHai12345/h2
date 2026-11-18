@@ -13,63 +13,64 @@ import java.time.Instant;
 
 @Entity
 @Table(
-        name = "external_identities",
-        uniqueConstraints = @UniqueConstraint(
-                name = "uk_external_identity_source",
-                columnNames = {"resource_type", "provider", "external_id"}))
+    name = "external_identities",
+    uniqueConstraints =
+        @UniqueConstraint(
+            name = "uk_external_identity_source",
+            columnNames = {"resource_type", "provider", "external_id"}))
 public class ExternalIdentity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+  @Id
+  @GeneratedValue(strategy = GenerationType.IDENTITY)
+  private Long id;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "resource_type", nullable = false, length = 30)
-    private ResourceType resourceType;
+  @Enumerated(EnumType.STRING)
+  @Column(name = "resource_type", nullable = false, length = 30)
+  private ResourceType resourceType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false, length = 40)
-    private Provider provider;
+  @Enumerated(EnumType.STRING)
+  @Column(nullable = false, length = 40)
+  private Provider provider;
 
-    @Column(name = "external_id", nullable = false, length = 120)
-    private String externalId;
+  @Column(name = "external_id", nullable = false, length = 120)
+  private String externalId;
 
-    @Column(name = "canonical_id", nullable = false)
-    private Long canonicalId;
+  @Column(name = "canonical_id", nullable = false)
+  private Long canonicalId;
 
-    @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
-    private Instant createdAt;
+  @Column(name = "created_at", nullable = false, insertable = false, updatable = false)
+  private Instant createdAt;
 
-    protected ExternalIdentity() {}
+  protected ExternalIdentity() {}
 
-    public ExternalIdentity(
-            ResourceType resourceType, Provider provider, String externalId, Long canonicalId) {
-        this.resourceType = resourceType;
-        this.provider = provider;
-        this.externalId = externalId;
-        this.canonicalId = canonicalId;
-    }
+  public ExternalIdentity(
+      ResourceType resourceType, Provider provider, String externalId, Long canonicalId) {
+    this.resourceType = resourceType;
+    this.provider = provider;
+    this.externalId = externalId;
+    this.canonicalId = canonicalId;
+  }
 
-    public Long getId() {
-        return id;
-    }
+  public Long getId() {
+    return id;
+  }
 
-    public ResourceType getResourceType() {
-        return resourceType;
-    }
+  public ResourceType getResourceType() {
+    return resourceType;
+  }
 
-    public Provider getProvider() {
-        return provider;
-    }
+  public Provider getProvider() {
+    return provider;
+  }
 
-    public String getExternalId() {
-        return externalId;
-    }
+  public String getExternalId() {
+    return externalId;
+  }
 
-    public Long getCanonicalId() {
-        return canonicalId;
-    }
+  public Long getCanonicalId() {
+    return canonicalId;
+  }
 
-    public Instant getCreatedAt() {
-        return createdAt;
-    }
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
 }

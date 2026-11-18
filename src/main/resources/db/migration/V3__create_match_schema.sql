@@ -1,0 +1,23 @@
+CREATE TABLE matches (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    season_id BIGINT NOT NULL,
+    home_team_id BIGINT NOT NULL,
+    away_team_id BIGINT NOT NULL,
+    kickoff_at TIMESTAMP(6) NOT NULL,
+    status VARCHAR(30) NOT NULL,
+    home_score SMALLINT NULL,
+    away_score SMALLINT NULL,
+    round_name VARCHAR(80) NULL,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    CONSTRAINT ck_matches_different_teams CHECK (home_team_id <> away_team_id),
+    CONSTRAINT ck_matches_home_score CHECK (home_score IS NULL OR home_score >= 0),
+    CONSTRAINT ck_matches_away_score CHECK (away_score IS NULL OR away_score >= 0),
+    CONSTRAINT fk_matches_season FOREIGN KEY (season_id) REFERENCES seasons (id),
+    CONSTRAINT fk_matches_home_team FOREIGN KEY (home_team_id) REFERENCES teams (id),
+    CONSTRAINT fk_matches_away_team FOREIGN KEY (away_team_id) REFERENCES teams (id),
+    INDEX idx_matches_season_kickoff (season_id, kickoff_at),
+    INDEX idx_matches_home_team_kickoff (home_team_id, kickoff_at),
+    INDEX idx_matches_away_team_kickoff (away_team_id, kickoff_at)
+) ENGINE=InnoDB;

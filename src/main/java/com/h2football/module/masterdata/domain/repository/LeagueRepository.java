@@ -13,37 +13,51 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 @RepositoryRestResource(collectionResourceRel = "leagues", path = "leagues")
 public interface LeagueRepository extends JpaRepository<League, Long> {
-    boolean existsByCode(String code);
-    Optional<League> findByCode(String code);
+  boolean existsByCode(String code);
 
-    @Override
-    @EntityGraph(attributePaths = "country")
-    List<League> findAll();
+  Optional<League> findByCode(String code);
 
-    @Override
-    @EntityGraph(attributePaths = "country")
-    List<League> findAll(Sort sort);
+  @Override
+  @EntityGraph(attributePaths = "country")
+  List<League> findAll();
 
-    @Override
-    @EntityGraph(attributePaths = "country")
-    Page<League> findAll(Pageable pageable);
+  @Override
+  @EntityGraph(attributePaths = "country")
+  List<League> findAll(Sort sort);
 
-    @Override
-    @EntityGraph(attributePaths = "country")
-    Optional<League> findById(Long id);
+  @Override
+  @EntityGraph(attributePaths = "country")
+  Page<League> findAll(Pageable pageable);
 
-    @Override @RestResource(exported = false)
-    <S extends League> S save(S entity);
-    @Override @RestResource(exported = false)
-    <S extends League> List<S> saveAll(Iterable<S> entities);
-    @Override @RestResource(exported = false)
-    void deleteById(Long id);
-    @Override @RestResource(exported = false)
-    void delete(League entity);
-    @Override @RestResource(exported = false)
-    void deleteAllById(Iterable<? extends Long> ids);
-    @Override @RestResource(exported = false)
-    void deleteAll(Iterable<? extends League> entities);
-    @Override @RestResource(exported = false)
-    void deleteAll();
+  @Override
+  @EntityGraph(attributePaths = "country")
+  Optional<League> findById(Long id);
+
+  @Override
+  @RestResource(exported = false)
+  <S extends League> S save(S entity);
+
+  @Override
+  @RestResource(exported = false)
+  <S extends League> List<S> saveAll(Iterable<S> entities);
+
+  @Override
+  @RestResource(exported = false)
+  void deleteById(Long id);
+
+  @Override
+  @RestResource(exported = false)
+  void delete(League entity);
+
+  @Override
+  @RestResource(exported = false)
+  void deleteAllById(Iterable<? extends Long> ids);
+
+  @Override
+  @RestResource(exported = false)
+  void deleteAll(Iterable<? extends League> entities);
+
+  @Override
+  @RestResource(exported = false)
+  void deleteAll();
 }
