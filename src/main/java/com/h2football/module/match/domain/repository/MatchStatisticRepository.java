@@ -11,6 +11,13 @@ import org.springframework.data.repository.query.Param;
 public interface MatchStatisticRepository extends JpaRepository<MatchStatistic, Long> {
   List<MatchStatistic> findAllByMatchIdOrderByPeriodAscGroupNameAscStatisticKeyAsc(Long matchId);
 
+  List<MatchStatistic> findAllByMatchIdAndProviderOrderByPeriodAscGroupNameAscStatisticKeyAsc(
+      Long matchId, Provider provider);
+
+  List<MatchStatistic>
+      findAllByMatchIdInAndProviderOrderByMatchIdAscPeriodAscGroupNameAscStatisticKeyAsc(
+          List<Long> matchIds, Provider provider);
+
   void deleteAllByMatchIdAndProvider(Long matchId, Provider provider);
 
   @Query(

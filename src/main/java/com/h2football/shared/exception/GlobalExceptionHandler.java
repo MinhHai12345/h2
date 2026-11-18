@@ -1,5 +1,6 @@
 package com.h2football.shared.exception;
 
+import com.h2football.module.analytics.application.MatchAnalyticsNotFoundException;
 import com.h2football.module.masterdata.application.DuplicateMasterDataException;
 import com.h2football.module.masterdata.application.MasterDataNotFoundException;
 import com.h2football.module.match.application.MatchNotFoundException;
@@ -52,7 +53,11 @@ public class GlobalExceptionHandler {
         request);
   }
 
-  @ExceptionHandler({MasterDataNotFoundException.class, MatchNotFoundException.class})
+  @ExceptionHandler({
+    MasterDataNotFoundException.class,
+    MatchNotFoundException.class,
+    MatchAnalyticsNotFoundException.class
+  })
   public ResponseEntity<ApiErrorResponse> handleNotFound(
       RuntimeException exception, HttpServletRequest request) {
     return build(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", exception.getMessage(), request);
