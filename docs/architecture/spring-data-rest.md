@@ -1,30 +1,45 @@
 # Spring Data REST
 
-Spring Data REST is installed as an additional HTTP adapter for repositories that are
-intentionally designed for direct resource exposure.
+Spring Data REST exposes the canonical master-data resources as read-only HAL resources.
+The regular application API remains responsible for all writes and business workflows.
 
-## API boundary
+## Configuration
 
-- The Spring Data REST base path is `/api/data`.
-- HAL JSON is the default representation.
-- Repository detection is set to `ANNOTATED`: a repository is not exported unless it
-  is explicitly annotated with `@RepositoryRestResource`.
-- Existing module repositories remain internal by default. Do not annotate them merely
-  to make CRUD endpoints appear.
+- Base path: `/api/data`
+- Default representation: HAL JSON
+- Repository detection: `ANNOTATED`; only repositories explicitly annotated with
+  `@RepositoryRestResource` are exported.
+- Entity IDs are included in representations.
+- The current exported resources are Country, League, Season and Team.
 
-## Layering and safety
+## Resources
 
-The normal application API remains under `/api/v1` and must continue to call application
-services. Spring Data REST is reserved for deliberately selected, low-risk resources or
-read-oriented resources with an explicitly reviewed repository contract.
+| Entity | Collection endpoint | Item endpoint |
+|---|---|---|
+| Country | `GET /api/data/countries` | `GET /api/data/countries/{id}` |
+| League | `GET /api/data/leagues` | `GET /api/data/leagues/{id}` |
+| Season | `GET /api/data/seasons` | `GET /api/data/seasons/{id}` |
+| Team | `GET /api/data/teams` | `GET /api/data/teams/{id}` |
 
-Before exporting a repository:
+Collection resources support Spring Data paging and sorting parameters such as
+`page`, `size` and `sort`. Related entities are represented through HAL association
+links; the repository fetch plans load the related Country or League when collections
+and items are read.
 
-1. Confirm that direct repository access does not bypass required application workflows.
-2. Review exposed associations, entity fields, paging, sorting, filtering, and write methods.
-3. Prefer read-only exposure where possible; do not expose internal persistence entities
-   or provider identity tables by default.
-4. Add focused API tests for the exported resource and its allowed HTTP methods.
+## Write boundary
 
-Do not expose a repository by changing the global detection strategy to `DEFAULT` or
-`ALL`. The explicit annotation requirement is a security and module-boundary safeguard.
+Spring Data REST mutation methods are explicitly hidden on each exported repository.
+Create and update operations must continue through the validated `/api/v1` controllers
+and application services. This prevents direct repository writes from bypassing
+application rules and transaction orchestration.
+
+## Adding another entity
+
+1. Add a dedicated repository annotation with a stable, plural resource path.
+2. Keep repository detection set to `ANNOTATED`.
+3. Expose IDs for the entity in `DataRestConfiguration`.
+4. Hide repository mutation methods unless a reviewed use case explicitly requires
+   direct writes.
+5. Add API tests for collection, item, associations and allowed HTTP methods.
+
+Do not expose provider identity tables or internal persistence entities by default.
