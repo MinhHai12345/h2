@@ -88,6 +88,15 @@ The application connects to the `h2_football` schema by default. Never point thi
 - Content consumes persisted analytics outputs; publication delivers approved content.
 - Do not create interfaces or package layers without a concrete need.
 
+## Analytics APIs
+
+- `GET /api/v1/matches/{matchId}/analytics?provider=SOFASCORE`
+- `GET /api/v1/matches/{matchId}/player-impact?provider=SOFASCORE`
+- `GET /api/v1/seasons/{seasonId}/match-analytics?provider=SOFASCORE`
+- `GET /api/v1/seasons/{seasonId}/player-performance?provider=SOFASCORE`
+
+Player Impact requires confirmed lineups for the target match. It uses only player match-statistic observations from finished matches in the same season before the target kickoff. Its 0–100 component-weighted index is descriptive; missing historical data remains null and is reported through team data coverage.
+
 ## Delivery phases
 
 1. Foundation and architecture guardrails.

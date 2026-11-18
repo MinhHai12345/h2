@@ -2,6 +2,9 @@ package com.h2football.module.match.domain.repository;
 
 import com.h2football.module.identity.domain.model.Provider;
 import com.h2football.module.match.domain.model.MatchPlayerStatistic;
+import com.h2football.module.match.domain.model.MatchStatus;
+import java.time.Instant;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -16,6 +19,26 @@ public interface MatchPlayerStatisticRepository extends JpaRepository<MatchPlaye
   @EntityGraph(attributePaths = {"player"})
   List<MatchPlayerStatistic> findAllByMatchIdAndProviderOrderByPlayerNameAsc(
       Long matchId, Provider provider);
+
+  @Query(
+      """
+      select statistic
+      from MatchPlayerStatistic statistic
+      join fetch statistic.player
+      join fetch statistic.match match
+      where match.season.id = :seasonId
+        and match.kickoffAt < :kickoffAt
+        and match.status = :status
+        and statistic.provider = :provider
+        and statistic.player.id in :playerIds
+      order by match.kickoffAt desc
+      """)
+  List<MatchPlayerStatistic> findHistoryBefore(
+      @Param("seasonId") Long seasonId,
+      @Param("kickoffAt") Instant kickoffAt,
+      @Param("status") MatchStatus status,
+      @Param("provider") Provider provider,
+      @Param("playerIds") Collection<Long> playerIds);
 
   @Query(
       """
