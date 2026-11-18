@@ -132,6 +132,35 @@ public class SofaScoreClientImpl implements SofaScoreClient {
     return payload.events() == null ? List.of() : payload.events();
   }
 
+  @Override
+  public SofaScoreDtos.EventStatisticsResponse fetchEventStatistics(long eventId) {
+    if (eventId <= 0) throw new IllegalArgumentException("eventId must be positive");
+    String homePage = properties.getWebUrl().replaceAll("/+$", "") + "/football";
+    String endpoint = SofaScorePageSpecs.eventStatisticsEndpoint(eventId);
+    return browser.withPage(
+        page -> {
+          try {
+            page.navigate(
+                homePage,
+                new Page.NavigateOptions()
+                    .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED)
+                    .setTimeout(properties.getNavigationTimeoutMillis()));
+            String body =
+                (String)
+                    page.evaluate(
+                        "(url) => fetch(url).then(async response => {"
+                            + "if (!response.ok) throw new Error('HTTP ' + response.status);"
+                            + "return await response.text();"
+                            + "})",
+                        endpoint);
+            return objectMapper.readValue(body, SofaScoreDtos.EventStatisticsResponse.class);
+          } catch (Exception exception) {
+            throw new SofaScoreFetchException(
+                "Failed to fetch SofaScore event statistics for event " + eventId, exception);
+          }
+        });
+  }
+
   private <T> T captureJson(
       Page page, SofaScorePageSpec spec, Class<T> responseType, String failureMessage) {
     AtomicReference<Response> captured = new AtomicReference<>();

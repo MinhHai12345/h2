@@ -2,6 +2,7 @@ package com.h2football.module.ingestion.api;
 
 import com.h2football.module.ingestion.application.SofaScoreMasterDataIngestionService;
 import com.h2football.module.ingestion.application.SofaScoreMatchIngestionService;
+import com.h2football.module.ingestion.application.SofaScoreMatchStatisticsIngestionService;
 import com.h2football.module.provider.sofascore.model.SofaScoreEventWindow;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -10,27 +11,25 @@ import java.util.Map;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/v1/ingestion/sofascore")
 public class SofaScoreIngestionController {
   private final SofaScoreMasterDataIngestionService masterDataIngestion;
   private final SofaScoreMatchIngestionService matchIngestion;
+  private final SofaScoreMatchStatisticsIngestionService statisticsIngestion;
 
   @Value("${app.ingestion.operations.api-key:}")
   private String configuredApiKey;
 
   public SofaScoreIngestionController(
       SofaScoreMasterDataIngestionService masterDataIngestion,
-      SofaScoreMatchIngestionService matchIngestion) {
+      SofaScoreMatchIngestionService matchIngestion,
+      SofaScoreMatchStatisticsIngestionService statisticsIngestion) {
     this.masterDataIngestion = masterDataIngestion;
     this.matchIngestion = matchIngestion;
+    this.statisticsIngestion = statisticsIngestion;
   }
 
   @PostMapping("/leagues/sync")
@@ -68,6 +67,16 @@ public class SofaScoreIngestionController {
       return ResponseEntity.status(authorization.getStatusCode()).body(authorization.getBody());
     return ResponseEntity.ok(
         matchIngestion.sync(tournamentId, sofaSeasonId, canonicalSeasonId, window, page));
+  }
+
+  @PostMapping("/matches/statistics/sync")
+  public ResponseEntity<?> syncMatchStatistics(
+      @RequestHeader(name = "X-Ingestion-Admin-Key", required = false) String suppliedApiKey,
+      @RequestParam long eventId) {
+    ResponseEntity<Map<String, String>> authorization = authorize(suppliedApiKey);
+    if (authorization != null)
+      return ResponseEntity.status(authorization.getStatusCode()).body(authorization.getBody());
+    return ResponseEntity.ok(statisticsIngestion.sync(eventId));
   }
 
   private ResponseEntity<Map<String, String>> authorize(String suppliedApiKey) {

@@ -2,6 +2,7 @@ package com.h2football.module.provider.sofascore.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import java.math.BigDecimal;
 import java.util.List;
 
 public final class SofaScoreDtos {
@@ -61,4 +62,25 @@ public final class SofaScoreDtos {
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record RoundInfo(String name) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record EventStatisticsResponse(
+      @JsonProperty("statistics") List<StatisticPeriod> statistics) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record StatisticPeriod(String period, List<StatisticGroup> groups) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record StatisticGroup(
+      @JsonProperty("groupName") String groupName,
+      @JsonProperty("statisticsItems") List<StatisticItem> statisticsItems) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record StatisticItem(
+      String name,
+      String key,
+      String home,
+      String away,
+      BigDecimal homeValue,
+      BigDecimal awayValue) {}
 }
