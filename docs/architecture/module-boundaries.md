@@ -19,6 +19,7 @@ com.h2football
 └── module
     ├── identity
     ├── masterdata
+    ├── player
     ├── match
     ├── provider
     ├── ingestion
@@ -39,7 +40,7 @@ The unique source key is `resource_type + provider + external_id`. A canonical I
 
 ## Provider boundary
 
-A provider client returns provider DTOs. Provider mappers convert them into neutral ingestion models. The ingestion application service validates and normalizes those models, then calls the owning `masterdata` or `match` application service to persist canonical records.
+A provider client returns provider DTOs. Provider mappers convert them into neutral ingestion models. The ingestion application service validates and normalizes those models, then calls the owning `masterdata`, `player` or `match` application service to persist canonical records.
 
 ## SofaScore page loading
 
@@ -47,11 +48,13 @@ A page specification explicitly owns the page URL and its endpoint specification
 
 ## Match boundary
 
-The `match` module owns fixtures, results, participant references, kickoff timestamps and normalized match status. Provider event DTOs must not be persisted directly. SofaScore event ingestion resolves team and season identities first, then delegates upsert operations to `MatchApplicationService`.
+The `match` module owns fixtures, results, participant references, kickoff timestamps, normalized match status, team lineups and match incidents. Provider event DTOs must not be persisted directly. SofaScore event ingestion resolves team, season, match and player identities first, then delegates upsert operations to the owning application services.
 
 ## Idempotency and provenance
 
 - External identity is unique by provider + resource type + external ID.
 - Reprocessing the same provider observation must not create duplicate canonical records.
+- Match lineups are replaced independently per team and provider; an absent team lineup does not erase the other team's snapshot.
+- Empty or not-yet-published lineups/incidents never erase previously persisted snapshots.
 - Persist source, source external ID, observation time and field provenance where multiple providers can contribute.
 - Separate observed facts from calculated analytics values.

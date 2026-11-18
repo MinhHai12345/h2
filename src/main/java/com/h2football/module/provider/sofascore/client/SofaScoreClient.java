@@ -14,4 +14,8 @@ public interface SofaScoreClient {
       long tournamentId, long seasonId, SofaScoreEventWindow window, int page);
 
   SofaScoreDtos.EventStatisticsResponse fetchEventStatistics(long eventId);
+
+  SofaScoreDtos.EventLineupsResponse fetchEventLineups(long eventId);
+
+  SofaScoreDtos.EventIncidentsResponse fetchEventIncidents(long eventId);
 }

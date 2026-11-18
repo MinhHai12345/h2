@@ -83,4 +83,56 @@ public final class SofaScoreDtos {
       String away,
       BigDecimal homeValue,
       BigDecimal awayValue) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record EventLineupsResponse(Boolean confirmed, TeamLineup home, TeamLineup away) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record TeamLineup(
+      String formation,
+      List<LineupPlayer> players,
+      @JsonProperty("missingPlayers") List<MissingPlayer> missingPlayers) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record LineupPlayer(
+      PlayerProfile player,
+      String position,
+      String shirtNumber,
+      String jerseyNumber,
+      Boolean substitute,
+      Boolean captain) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record MissingPlayer(PlayerProfile player, String reason) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record PlayerProfile(
+      Long id,
+      String name,
+      String shortName,
+      String slug,
+      String position,
+      String jerseyNumber,
+      Country country) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record EventIncidentsResponse(List<Incident> incidents) {}
+
+  @JsonIgnoreProperties(ignoreUnknown = true)
+  public record Incident(
+      Long id,
+      Integer time,
+      Integer addedTime,
+      Boolean isHome,
+      String text,
+      String reason,
+      Integer homeScore,
+      Integer awayScore,
+      String incidentType,
+      String incidentClass,
+      Boolean rescinded,
+      PlayerProfile player,
+      PlayerProfile assist1,
+      PlayerProfile playerIn,
+      PlayerProfile playerOut) {}
 }

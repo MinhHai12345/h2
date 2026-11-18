@@ -12,24 +12,26 @@ Statistics are stored per match, provider, period and statistic key. The schema 
 
 SofaScore statistics are grouped by period (`ALL`, `1ST`, `2ND`, etc.) and source group. The provider adapter maps the response into neutral snapshots; the match application service owns persistence. Re-sync replaces that provider's snapshot only when at least one valid statistic is returned, so an empty response never erases previously stored data.
 
+## Lineups and incidents
+
+Canonical players are owned by the `player` module. SofaScore player IDs are mapped through the shared identity table using resource type `PLAYER`. No `PlayerExternalIdentity` entity is introduced.
+
+Lineups are stored per match, team and provider with formation and confirmation state. Each lineup player has a role of `STARTER`, `SUBSTITUTE` or `MISSING`, plus position, shirt number, captain flag and optional missing reason. A partial response only replaces the team lineups present in that response.
+
+Incidents are stored in source order and preserve event type/class, minute, added time, side, running score, rescinded state and optional relationships to the main player, assist, player entering and player leaving. Period markers without a side are stored as `NEUTRAL`.
+
 ## Manual SofaScore sync
 
-Sync leagues, teams and matches first. Then fetch statistics for a known SofaScore event:
+Sync leagues, teams and matches first. Then fetch statistics, lineups and incidents for a known SofaScore event:
 
-`POST /api/v1/ingestion/sofascore/matches/statistics/sync?eventId={sofaScoreEventId}`
+- `POST /api/v1/ingestion/sofascore/matches/statistics/sync?eventId={sofaScoreEventId}`
+- `POST /api/v1/ingestion/sofascore/matches/lineups/sync?eventId={sofaScoreEventId}`
+- `POST /api/v1/ingestion/sofascore/matches/incidents/sync?eventId={sofaScoreEventId}`
 
-Read canonical statistics:
+Read canonical match data:
 
-`GET /api/v1/matches/{matchId}/statistics`
+- `GET /api/v1/matches/{matchId}/statistics`
+- `GET /api/v1/matches/{matchId}/lineups?provider=SOFASCORE`
+- `GET /api/v1/matches/{matchId}/incidents?provider=SOFASCORE`
 
-Ingestion requires the `X-Ingestion-Admin-Key` header. Statistics are retrieved from SofaScore's event endpoint `/api/v1/event/{eventId}/statistics`.
-
-## Manual match sync
-
-`POST /api/v1/ingestion/sofascore/matches/sync?tournamentId={sofaTournamentId}&sofaSeasonId={sofaSeasonId}&canonicalSeasonId={seasonId}&window=NEXT&page=0`
-
-Use `window=NEXT` for upcoming events and `window=LAST` for completed/recent events. Pages are zero-based. The response reports created, updated and skipped event counts with warnings for teams that have not yet been mapped.
-
-List canonical matches with:
-
-`GET /api/v1/matches?seasonId={seasonId}`
+All ingestion endpoints require the `X-Ingestion-Admin-Key` header. Missing lineups (SofaScore HTTP 404) and empty incident responses do not erase previously stored data.

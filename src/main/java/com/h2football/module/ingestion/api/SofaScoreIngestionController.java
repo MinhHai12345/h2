@@ -1,7 +1,9 @@
 package com.h2football.module.ingestion.api;
 
 import com.h2football.module.ingestion.application.SofaScoreMasterDataIngestionService;
+import com.h2football.module.ingestion.application.SofaScoreMatchIncidentIngestionService;
 import com.h2football.module.ingestion.application.SofaScoreMatchIngestionService;
+import com.h2football.module.ingestion.application.SofaScoreMatchLineupIngestionService;
 import com.h2football.module.ingestion.application.SofaScoreMatchStatisticsIngestionService;
 import com.h2football.module.provider.sofascore.model.SofaScoreEventWindow;
 import java.nio.charset.StandardCharsets;
@@ -19,6 +21,8 @@ public class SofaScoreIngestionController {
   private final SofaScoreMasterDataIngestionService masterDataIngestion;
   private final SofaScoreMatchIngestionService matchIngestion;
   private final SofaScoreMatchStatisticsIngestionService statisticsIngestion;
+  private final SofaScoreMatchLineupIngestionService lineupIngestion;
+  private final SofaScoreMatchIncidentIngestionService incidentIngestion;
 
   @Value("${app.ingestion.operations.api-key:}")
   private String configuredApiKey;
@@ -26,10 +30,14 @@ public class SofaScoreIngestionController {
   public SofaScoreIngestionController(
       SofaScoreMasterDataIngestionService masterDataIngestion,
       SofaScoreMatchIngestionService matchIngestion,
-      SofaScoreMatchStatisticsIngestionService statisticsIngestion) {
+      SofaScoreMatchStatisticsIngestionService statisticsIngestion,
+      SofaScoreMatchLineupIngestionService lineupIngestion,
+      SofaScoreMatchIncidentIngestionService incidentIngestion) {
     this.masterDataIngestion = masterDataIngestion;
     this.matchIngestion = matchIngestion;
     this.statisticsIngestion = statisticsIngestion;
+    this.lineupIngestion = lineupIngestion;
+    this.incidentIngestion = incidentIngestion;
   }
 
   @PostMapping("/leagues/sync")
@@ -77,6 +85,26 @@ public class SofaScoreIngestionController {
     if (authorization != null)
       return ResponseEntity.status(authorization.getStatusCode()).body(authorization.getBody());
     return ResponseEntity.ok(statisticsIngestion.sync(eventId));
+  }
+
+  @PostMapping("/matches/lineups/sync")
+  public ResponseEntity<?> syncMatchLineups(
+      @RequestHeader(name = "X-Ingestion-Admin-Key", required = false) String suppliedApiKey,
+      @RequestParam long eventId) {
+    ResponseEntity<Map<String, String>> authorization = authorize(suppliedApiKey);
+    if (authorization != null)
+      return ResponseEntity.status(authorization.getStatusCode()).body(authorization.getBody());
+    return ResponseEntity.ok(lineupIngestion.sync(eventId));
+  }
+
+  @PostMapping("/matches/incidents/sync")
+  public ResponseEntity<?> syncMatchIncidents(
+      @RequestHeader(name = "X-Ingestion-Admin-Key", required = false) String suppliedApiKey,
+      @RequestParam long eventId) {
+    ResponseEntity<Map<String, String>> authorization = authorize(suppliedApiKey);
+    if (authorization != null)
+      return ResponseEntity.status(authorization.getStatusCode()).body(authorization.getBody());
+    return ResponseEntity.ok(incidentIngestion.sync(eventId));
   }
 
   private ResponseEntity<Map<String, String>> authorize(String suppliedApiKey) {

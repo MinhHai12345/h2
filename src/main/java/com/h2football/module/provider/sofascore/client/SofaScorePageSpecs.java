@@ -61,8 +61,20 @@ public final class SofaScorePageSpecs {
   }
 
   public static String eventStatisticsEndpoint(long eventId) {
+    return eventEndpoint(eventId, "statistics");
+  }
+
+  public static String eventLineupsEndpoint(long eventId) {
+    return eventEndpoint(eventId, "lineups");
+  }
+
+  public static String eventIncidentsEndpoint(long eventId) {
+    return eventEndpoint(eventId, "incidents");
+  }
+
+  private static String eventEndpoint(long eventId, String resource) {
     requirePositive(eventId, "eventId");
-    return "/api/v1/event/" + eventId + "/statistics";
+    return "/api/v1/event/" + eventId + "/" + resource;
   }
 
   private static String normalizeBaseUrl(String value) {
