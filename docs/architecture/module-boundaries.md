@@ -45,6 +45,10 @@ A provider client returns provider DTOs. Provider mappers convert them into neut
 
 A page specification explicitly owns the page URL and its endpoint specifications. One browser page load may capture several endpoint responses. Endpoint matching, response status, parsing and fetch diagnostics remain in the SofaScore provider implementation. Canonical persistence remains outside the provider.
 
+## Match boundary
+
+The `match` module owns fixtures, results, participant references, kickoff timestamps and normalized match status. Provider event DTOs must not be persisted directly. SofaScore event ingestion resolves team and season identities first, then delegates upsert operations to `MatchApplicationService`.
+
 ## Idempotency and provenance
 
 - External identity is unique by provider + resource type + external ID.

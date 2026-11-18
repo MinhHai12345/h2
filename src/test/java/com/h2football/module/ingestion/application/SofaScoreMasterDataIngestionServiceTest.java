@@ -12,28 +12,34 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 
 class SofaScoreMasterDataIngestionServiceTest {
-    private final SofaScoreMasterDataProvider provider = mock(SofaScoreMasterDataProvider.class);
-    private final MasterDataImportApplicationService masterData =
-            mock(MasterDataImportApplicationService.class);
-    private final SofaScoreMasterDataIngestionService service =
-            new SofaScoreMasterDataIngestionService(provider, masterData);
+  private final SofaScoreMasterDataProvider provider = mock(SofaScoreMasterDataProvider.class);
+  private final MasterDataImportApplicationService masterData =
+      mock(MasterDataImportApplicationService.class);
+  private final SofaScoreMasterDataIngestionService service =
+      new SofaScoreMasterDataIngestionService(provider, masterData);
 
-    @Test
-    void importsLeagueAndReturnsSeasonDiscoveryWithoutInventingDates() {
-        Country country = mock(Country.class);
-        when(country.getId()).thenReturn(4L);
-        when(provider.fetchLeagues(List.of(17L))).thenReturn(List.of(
-                new SofaScoreLeagueSnapshot("17", "Premier League", "GB", "England",
-                        List.of(new SofaScoreSeasonSnapshot("52186", "2025", "2025/2026", true)))));
-        when(masterData.importCountry("SOFASCORE", "GB", "GB", "England")).thenReturn(country);
+  @Test
+  void importsLeagueAndReturnsSeasonDiscoveryWithoutInventingDates() {
+    Country country = mock(Country.class);
+    when(country.getId()).thenReturn(4L);
+    when(provider.fetchLeagues(List.of(17L)))
+        .thenReturn(
+            List.of(
+                new SofaScoreLeagueSnapshot(
+                    "17",
+                    "Premier League",
+                    "GB",
+                    "England",
+                    List.of(new SofaScoreSeasonSnapshot("52186", "2025", "2025/2026", true)))));
+    when(masterData.importCountry("SOFASCORE", "GB", "GB", "England")).thenReturn(country);
 
-        var result = service.syncLeagues(List.of(17L));
+    var result = service.syncLeagues(List.of(17L));
 
-        assertThat(result.importedLeagues()).isEqualTo(1);
-        assertThat(result.discoveredSeasons()).isEqualTo(1);
-        assertThat(result.skippedSeasons()).isEqualTo(1);
-        assertThat(result.leagues().get(0).seasons().get(0).externalId()).isEqualTo("52186");
-        assertThat(result.warnings()).anyMatch(message -> message.contains("startDate/endDate"));
-        verify(masterData).importLeague("SOFASCORE", "17", "SOFASCORE_17", "Premier League", 4L);
-    }
+    assertThat(result.importedLeagues()).isEqualTo(1);
+    assertThat(result.discoveredSeasons()).isEqualTo(1);
+    assertThat(result.skippedSeasons()).isEqualTo(1);
+    assertThat(result.leagues().get(0).seasons().get(0).externalId()).isEqualTo("52186");
+    assertThat(result.warnings()).anyMatch(message -> message.contains("startDate/endDate"));
+    verify(masterData).importLeague("SOFASCORE", "17", "SOFASCORE_17", "Premier League", 4L);
+  }
 }
