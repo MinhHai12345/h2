@@ -60,6 +60,11 @@ public final class SofaScorePageSpecs {
         List.of(SofaScoreEndpointSpec.required(endpoint)));
   }
 
+  public static String eventStatisticsEndpoint(long eventId) {
+    requirePositive(eventId, "eventId");
+    return "/api/v1/event/" + eventId + "/statistics";
+  }
+
   private static String normalizeBaseUrl(String value) {
     if (value == null || value.isBlank())
       throw new IllegalArgumentException("SofaScore web URL must not be blank");
