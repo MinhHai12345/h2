@@ -17,3 +17,7 @@ The masterdata module owns canonical countries, leagues, seasons and teams. Prov
 - `POST/GET /api/v1/master-data/teams`
 
 All writes are validated in API/application layers and protected by database constraints. Flyway owns schema creation; Hibernate remains in validate mode.
+
+## Follow-up boundary
+
+The external identity table is the persistence foundation for provider mappings. Provider-specific identity resolution and ingestion workflows will be implemented in the provider/ingestion phase, rather than coupling provider DTOs to these canonical entities.
