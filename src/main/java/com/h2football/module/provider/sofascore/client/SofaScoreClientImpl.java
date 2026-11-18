@@ -62,9 +62,8 @@ public class SofaScoreClientImpl implements SofaScoreClient {
       navigate(page, spec);
       waitUntil(page, () -> catalogueResponse.get() != null);
       Response captured = catalogueResponse.get();
-      if (captured == null || !captured.ok()) {
+      if (captured == null || !captured.ok())
         throw new SofaScoreFetchException("SofaScore tournament catalogue request failed");
-      }
       SofaScoreDtos.TournamentCatalogue payload =
           objectMapper.readValue(captured.text(), SofaScoreDtos.TournamentCatalogue.class);
       List<SofaScoreDtos.Tournament> tournaments =
@@ -134,9 +133,35 @@ public class SofaScoreClientImpl implements SofaScoreClient {
 
   @Override
   public SofaScoreDtos.EventStatisticsResponse fetchEventStatistics(long eventId) {
+    return fetchEventEndpoint(
+        eventId,
+        SofaScorePageSpecs.eventStatisticsEndpoint(eventId),
+        "statistics",
+        SofaScoreDtos.EventStatisticsResponse.class);
+  }
+
+  @Override
+  public SofaScoreDtos.EventLineupsResponse fetchEventLineups(long eventId) {
+    return fetchEventEndpoint(
+        eventId,
+        SofaScorePageSpecs.eventLineupsEndpoint(eventId),
+        "lineups",
+        SofaScoreDtos.EventLineupsResponse.class);
+  }
+
+  @Override
+  public SofaScoreDtos.EventIncidentsResponse fetchEventIncidents(long eventId) {
+    return fetchEventEndpoint(
+        eventId,
+        SofaScorePageSpecs.eventIncidentsEndpoint(eventId),
+        "incidents",
+        SofaScoreDtos.EventIncidentsResponse.class);
+  }
+
+  private <T> T fetchEventEndpoint(
+      long eventId, String apiPath, String resource, Class<T> responseType) {
     if (eventId <= 0) throw new IllegalArgumentException("eventId must be positive");
     String homePage = properties.getWebUrl().replaceAll("/+$", "") + "/football";
-    String endpoint = SofaScorePageSpecs.eventStatisticsEndpoint(eventId);
     return browser.withPage(
         page -> {
           try {
@@ -145,18 +170,30 @@ public class SofaScoreClientImpl implements SofaScoreClient {
                 new Page.NavigateOptions()
                     .setWaitUntil(com.microsoft.playwright.options.WaitUntilState.DOMCONTENTLOADED)
                     .setTimeout(properties.getNavigationTimeoutMillis()));
-            String body =
-                (String)
+            @SuppressWarnings("unchecked")
+            Map<String, Object> result =
+                (Map<String, Object>)
                     page.evaluate(
-                        "(url) => fetch(url).then(async response => {"
-                            + "if (!response.ok) throw new Error('HTTP ' + response.status);"
-                            + "return await response.text();"
-                            + "})",
-                        endpoint);
-            return objectMapper.readValue(body, SofaScoreDtos.EventStatisticsResponse.class);
+                        "(url) => fetch(url).then(async response => ({status: response.status, body: await response.text()}))",
+                        apiPath);
+            int status = ((Number) result.get("status")).intValue();
+            if (status == 404 && ("lineups".equals(resource) || "incidents".equals(resource))) {
+              String emptyPayload =
+                  "lineups".equals(resource)
+                      ? "{\"confirmed\":false,\"home\":{\"players\":[]},\"away\":{\"players\":[]}}"
+                      : "{\"incidents\":[]}";
+              return objectMapper.readValue(emptyPayload, responseType);
+            }
+            if (status < 200 || status >= 300) {
+              throw new SofaScoreFetchException(
+                  "SofaScore event " + resource + " request failed with HTTP " + status);
+            }
+            return objectMapper.readValue((String) result.get("body"), responseType);
+          } catch (SofaScoreFetchException exception) {
+            throw exception;
           } catch (Exception exception) {
             throw new SofaScoreFetchException(
-                "Failed to fetch SofaScore event statistics for event " + eventId, exception);
+                "Failed to fetch SofaScore event " + resource + " for event " + eventId, exception);
           }
         });
   }

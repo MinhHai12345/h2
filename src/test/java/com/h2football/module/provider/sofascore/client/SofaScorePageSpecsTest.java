@@ -44,6 +44,16 @@ class SofaScorePageSpecsTest {
   }
 
   @Test
+  void createsEventDetailEndpointPaths() {
+    assertThat(SofaScorePageSpecs.eventStatisticsEndpoint(123L))
+        .isEqualTo("/api/v1/event/123/statistics");
+    assertThat(SofaScorePageSpecs.eventLineupsEndpoint(123L))
+        .isEqualTo("/api/v1/event/123/lineups");
+    assertThat(SofaScorePageSpecs.eventIncidentsEndpoint(123L))
+        .isEqualTo("/api/v1/event/123/incidents");
+  }
+
+  @Test
   void rejectsInvalidTournamentOrSeasonIdsAndNegativePage() {
     assertThatThrownBy(() -> SofaScorePageSpecs.standings("https://www.sofascore.com", 0, 10))
         .isInstanceOf(IllegalArgumentException.class);
@@ -51,6 +61,8 @@ class SofaScorePageSpecsTest {
             () ->
                 SofaScorePageSpecs.events(
                     "https://www.sofascore.com", 17, 10, SofaScoreEventWindow.LAST, -1))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(() -> SofaScorePageSpecs.eventIncidentsEndpoint(0))
         .isInstanceOf(IllegalArgumentException.class);
   }
 }

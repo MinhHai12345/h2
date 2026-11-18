@@ -71,6 +71,8 @@ class MatchApplicationServiceTest {
     when(seasons.findById(3L)).thenReturn(Optional.of(season));
     when(teams.findById(10L)).thenReturn(Optional.of(home));
     when(teams.findById(20L)).thenReturn(Optional.of(away));
+    when(home.getId()).thenReturn(10L);
+    when(away.getId()).thenReturn(20L);
     when(matches.save(any(Match.class))).thenReturn(saved);
     when(saved.getId()).thenReturn(88L);
 

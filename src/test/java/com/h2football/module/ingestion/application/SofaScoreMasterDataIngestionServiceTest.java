@@ -3,6 +3,7 @@ package com.h2football.module.ingestion.application;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
+import com.h2football.module.identity.domain.model.Provider;
 import com.h2football.module.masterdata.application.MasterDataImportApplicationService;
 import com.h2football.module.masterdata.domain.model.Country;
 import com.h2football.module.provider.sofascore.SofaScoreMasterDataProvider;
@@ -31,7 +32,7 @@ class SofaScoreMasterDataIngestionServiceTest {
                     "GB",
                     "England",
                     List.of(new SofaScoreSeasonSnapshot("52186", "2025", "2025/2026", true)))));
-    when(masterData.importCountry("SOFASCORE", "GB", "GB", "England")).thenReturn(country);
+    when(masterData.importCountry(Provider.SOFASCORE, "GB", "GB", "England")).thenReturn(country);
 
     var result = service.syncLeagues(List.of(17L));
 
@@ -40,6 +41,6 @@ class SofaScoreMasterDataIngestionServiceTest {
     assertThat(result.skippedSeasons()).isEqualTo(1);
     assertThat(result.leagues().get(0).seasons().get(0).externalId()).isEqualTo("52186");
     assertThat(result.warnings()).anyMatch(message -> message.contains("startDate/endDate"));
-    verify(masterData).importLeague("SOFASCORE", "17", "SOFASCORE_17", "Premier League", 4L);
+    verify(masterData).importLeague(Provider.SOFASCORE, "17", "SOFASCORE_17", "Premier League", 4L);
   }
 }

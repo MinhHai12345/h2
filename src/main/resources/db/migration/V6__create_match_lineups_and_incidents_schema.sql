@@ -1,0 +1,62 @@
+CREATE TABLE match_lineups (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    match_id BIGINT NOT NULL,
+    team_id BIGINT NOT NULL,
+    provider VARCHAR(40) NOT NULL,
+    formation VARCHAR(20) NULL,
+    confirmed BOOLEAN NOT NULL DEFAULT FALSE,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    updated_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6) ON UPDATE CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    CONSTRAINT fk_match_lineups_match FOREIGN KEY (match_id) REFERENCES matches (id) ON DELETE CASCADE,
+    CONSTRAINT fk_match_lineups_team FOREIGN KEY (team_id) REFERENCES teams (id),
+    CONSTRAINT uk_match_lineup_source UNIQUE (match_id, team_id, provider),
+    INDEX idx_match_lineups_match (match_id, provider)
+) ENGINE=InnoDB;
+
+CREATE TABLE match_lineup_players (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    lineup_id BIGINT NOT NULL,
+    player_id BIGINT NOT NULL,
+    player_role VARCHAR(20) NOT NULL,
+    position VARCHAR(10) NULL,
+    shirt_number VARCHAR(10) NULL,
+    captain BOOLEAN NOT NULL DEFAULT FALSE,
+    missing_reason VARCHAR(120) NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_match_lineup_players_lineup FOREIGN KEY (lineup_id) REFERENCES match_lineups (id) ON DELETE CASCADE,
+    CONSTRAINT fk_match_lineup_players_player FOREIGN KEY (player_id) REFERENCES players (id),
+    CONSTRAINT uk_match_lineup_player_role UNIQUE (lineup_id, player_id, player_role),
+    INDEX idx_match_lineup_players_player (player_id)
+) ENGINE=InnoDB;
+
+CREATE TABLE match_incidents (
+    id BIGINT NOT NULL AUTO_INCREMENT,
+    match_id BIGINT NOT NULL,
+    provider VARCHAR(40) NOT NULL,
+    external_id VARCHAR(120) NOT NULL,
+    sort_order INT NOT NULL,
+    incident_type VARCHAR(40) NOT NULL,
+    incident_class VARCHAR(40) NULL,
+    minute SMALLINT NULL,
+    added_time SMALLINT NULL,
+    side VARCHAR(20) NOT NULL,
+    text VARCHAR(160) NULL,
+    reason VARCHAR(160) NULL,
+    home_score SMALLINT NULL,
+    away_score SMALLINT NULL,
+    rescinded BOOLEAN NOT NULL DEFAULT FALSE,
+    player_id BIGINT NULL,
+    assist_player_id BIGINT NULL,
+    player_in_id BIGINT NULL,
+    player_out_id BIGINT NULL,
+    created_at TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP(6),
+    PRIMARY KEY (id),
+    CONSTRAINT fk_match_incidents_match FOREIGN KEY (match_id) REFERENCES matches (id) ON DELETE CASCADE,
+    CONSTRAINT fk_match_incidents_player FOREIGN KEY (player_id) REFERENCES players (id),
+    CONSTRAINT fk_match_incidents_assist FOREIGN KEY (assist_player_id) REFERENCES players (id),
+    CONSTRAINT fk_match_incidents_player_in FOREIGN KEY (player_in_id) REFERENCES players (id),
+    CONSTRAINT fk_match_incidents_player_out FOREIGN KEY (player_out_id) REFERENCES players (id),
+    CONSTRAINT uk_match_incident_source UNIQUE (match_id, provider, external_id),
+    INDEX idx_match_incidents_timeline (match_id, provider, sort_order)
+) ENGINE=InnoDB;

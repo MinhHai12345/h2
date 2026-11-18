@@ -44,6 +44,9 @@ class ExternalIdentityServiceTest {
 
   @Test
   void allowsDifferentProvidersToResolveToSameCanonicalRecord() {
+    when(repository.save(any(ExternalIdentity.class)))
+        .thenAnswer(invocation -> invocation.getArgument(0));
+
     ExternalIdentity sofascore =
         service.register(ResourceType.TEAM, Provider.SOFASCORE, "42", 200L);
     ExternalIdentity footballData =
