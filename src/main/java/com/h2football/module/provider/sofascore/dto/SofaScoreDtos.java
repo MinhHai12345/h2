@@ -2,6 +2,7 @@ package com.h2football.module.provider.sofascore.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.JsonNode;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -100,7 +101,8 @@ public final class SofaScoreDtos {
       String shirtNumber,
       String jerseyNumber,
       Boolean substitute,
-      Boolean captain) {}
+      Boolean captain,
+      JsonNode statistics) {}
 
   @JsonIgnoreProperties(ignoreUnknown = true)
   public record MissingPlayer(PlayerProfile player, String reason) {}

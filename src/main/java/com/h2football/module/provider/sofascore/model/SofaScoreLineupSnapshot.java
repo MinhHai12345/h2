@@ -15,5 +15,6 @@ public record SofaScoreLineupSnapshot(boolean confirmed, TeamLineup home, TeamLi
       String shirtNumber,
       boolean substitute,
       boolean captain,
-      String missingReason) {}
+      String missingReason,
+      SofaScorePlayerStatisticsSnapshot statistics) {}
 }
