@@ -2,6 +2,7 @@ package com.h2football.module.match.domain.repository;
 
 import com.h2football.module.identity.domain.model.Provider;
 import com.h2football.module.match.domain.model.MatchStatistic;
+import java.math.BigDecimal;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -11,6 +12,40 @@ public interface MatchStatisticRepository extends JpaRepository<MatchStatistic, 
   List<MatchStatistic> findAllByMatchIdOrderByPeriodAscGroupNameAscStatisticKeyAsc(Long matchId);
 
   void deleteAllByMatchIdAndProvider(Long matchId, Provider provider);
+
+  @Query(
+      value =
+          """
+          SELECT AVG(opponent_rows.opponent_value)
+          FROM (
+            SELECT statistic.away_value AS opponent_value
+            FROM match_statistics statistic
+            JOIN matches match_record ON match_record.id = statistic.match_id
+            WHERE match_record.season_id = :seasonId
+              AND match_record.home_team_id = :teamId
+              AND match_record.status = 'FINISHED'
+              AND statistic.provider = :provider
+              AND statistic.period = 'ALL'
+              AND statistic.statistic_key = 'expectedGoals'
+              AND statistic.away_value IS NOT NULL
+            UNION ALL
+            SELECT statistic.home_value AS opponent_value
+            FROM match_statistics statistic
+            JOIN matches match_record ON match_record.id = statistic.match_id
+            WHERE match_record.season_id = :seasonId
+              AND match_record.away_team_id = :teamId
+              AND match_record.status = 'FINISHED'
+              AND statistic.provider = :provider
+              AND statistic.period = 'ALL'
+              AND statistic.statistic_key = 'expectedGoals'
+              AND statistic.home_value IS NOT NULL
+          ) opponent_rows
+          """,
+      nativeQuery = true)
+  BigDecimal averageExpectedGoalsAgainstBySeasonAndTeam(
+      @Param("seasonId") Long seasonId,
+      @Param("provider") String provider,
+      @Param("teamId") Long teamId);
 
   @Query(
       value =
