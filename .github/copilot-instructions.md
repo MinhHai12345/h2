@@ -33,6 +33,17 @@
 - Handle WebClient and Playwright lifecycle, timeouts, retries, and resource cleanup explicitly.
 - Avoid speculative abstractions and unnecessary dependencies. Follow existing dependency versions and package conventions.
 
+## Java formatting (mandatory)
+- Use Spotless Maven Plugin with google-java-format as the single source of truth for Java formatting.
+- Do not manually debate or override formatter layout. Run `mvn spotless:apply` to format all Java source and test files.
+- Run `mvn spotless:check` before pushing or opening/updating a pull request; the command must pass without modifying files.
+- Install the repository pre-commit hook once per local clone:
+  `git config core.hooksPath .githooks`
+- After installation, every `git commit` automatically runs `mvn -q spotless:apply` and stages formatter changes for tracked Java files.
+- If the hook fails because Maven is unavailable, install/configure Maven and retry. Do not bypass the hook with `--no-verify`.
+- CI runs the same Spotless check on pull requests targeting `main` and pushes to `main`.
+- Keep UTF-8 encoding, LF line endings, final newline, and no trailing whitespace as defined by `.editorconfig`.
+
 ## Terminology restriction
 - Never use betting, gambling, wagering, odds, or related terminology in source code, identifiers, comments, logs, API contracts, documentation, or generated content.
 - Use neutral data-science terminology such as expected goals (xG), probability distribution, statistical indicators, match analysis, and model evaluation.
@@ -43,9 +54,10 @@
 2. Explain the impact on module boundaries and persistence before broad changes.
 3. Make the smallest complete change consistent with the architecture.
 4. Update or add focused tests and documentation with the implementation.
-5. Do not claim compilation or tests passed unless they were actually executed and their results are known.
-6. Do not run compile, test, migration, or destructive database commands unless the user explicitly asks.
-7. Do not silently rewrite unrelated modules, schema, or configuration.
+5. Format Java code with Spotless before committing and verify with `mvn spotless:check`.
+6. Do not claim compilation or tests passed unless they were actually executed and their results are known.
+7. Do not run compile, test, migration, or destructive database commands unless the user explicitly asks.
+8. Do not silently rewrite unrelated modules, schema, or configuration.
 
 ## Dependency direction
 - `bootstrap` and `infrastructure` may wire implementations together.

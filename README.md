@@ -19,9 +19,42 @@ MMO remains the legacy/reference application. H2-Football uses a new repository 
 
 1. Copy `.env.example` to `.env` and set local credentials.
 2. Start MySQL: `docker compose up -d mysql`.
-3. Run the application with the `dev` profile using your IDE or `./mvnw spring-boot:run`.
+3. Run the application with the `dev` profile using your IDE or `mvn spring-boot:run`.
 
 The project has intentionally not been compiled or tested as part of this scaffold delivery.
+
+## Java formatting
+
+Java formatting is enforced by Spotless + google-java-format.
+
+1. Install Maven and Java 17.
+2. Enable the repository Git hook once in each local clone:
+
+   ```bash
+   git config core.hooksPath .githooks
+   ```
+
+3. Commit normally. The `.githooks/pre-commit` hook runs:
+
+   ```bash
+   mvn -q spotless:apply
+   ```
+
+   Any formatting changes to tracked Java files are staged automatically.
+
+4. To format manually:
+
+   ```bash
+   mvn spotless:apply
+   ```
+
+5. To verify formatting without changing files:
+
+   ```bash
+   mvn spotless:check
+   ```
+
+The Git hook is installed once per clone; the workflow check runs in GitHub Actions for pull requests to `main` and pushes to `main`. Do not bypass the hook with `--no-verify`.
 
 ## Database safety
 

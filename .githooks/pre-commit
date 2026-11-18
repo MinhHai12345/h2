@@ -1,0 +1,16 @@
+#!/bin/sh
+set -eu
+
+if ! command -v mvn >/dev/null 2>&1; then
+  echo "Maven is required to run the pre-commit formatter." >&2
+  echo "Install Maven, then retry the commit." >&2
+  exit 1
+fi
+
+echo "Running Spotless Java formatter..."
+mvn -q spotless:apply
+
+# Include formatter changes in the commit.
+git add -u -- '*.java'
+
+echo "Java formatting completed."
