@@ -2,7 +2,7 @@ package com.h2football.bootstrap.configuration;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.rest.core.config.RepositoryRestConfiguration;
-import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategies;
+import org.springframework.data.rest.core.mapping.RepositoryDetectionStrategy;
 import org.springframework.data.rest.webmvc.config.RepositoryRestConfigurer;
 import org.springframework.hateoas.MediaTypes;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -15,6 +15,6 @@ public class DataRestConfiguration implements RepositoryRestConfigurer {
             RepositoryRestConfiguration config, CorsRegistry cors) {
         config.setBasePath("/api/data");
         config.setDefaultMediaType(MediaTypes.HAL_JSON);
-        config.setRepositoryDetectionStrategy(RepositoryDetectionStrategies.ANNOTATED);
+        config.setRepositoryDetectionStrategy(RepositoryDetectionStrategy.RepositoryDetectionStrategies.ANNOTATED);
     }
 }
