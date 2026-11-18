@@ -1,11 +1,15 @@
 package com.h2football.module.provider.sofascore.mapper;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.h2football.module.provider.sofascore.dto.SofaScoreDtos;
 import com.h2football.module.provider.sofascore.model.SofaScoreIncidentSnapshot;
 import com.h2football.module.provider.sofascore.model.SofaScoreLineupSnapshot;
 import com.h2football.module.provider.sofascore.model.SofaScorePlayerSnapshot;
+import com.h2football.module.provider.sofascore.model.SofaScorePlayerStatisticsSnapshot;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -32,19 +36,40 @@ public class SofaScoreMatchEventMapper {
                 first(item.shirtNumber(), item.jerseyNumber(), item.player().jerseyNumber()),
                 Boolean.TRUE.equals(item.substitute()),
                 Boolean.TRUE.equals(item.captain()),
-                null));
+                null,
+                mapPlayerStatistics(item.statistics())));
       }
     }
     if (source.missingPlayers() != null) {
       for (SofaScoreDtos.MissingPlayer item : source.missingPlayers()) {
         SofaScorePlayerSnapshot player = mapPlayer(item == null ? null : item.player());
-        if (player != null)
+        if (player != null) {
           players.add(
               new SofaScoreLineupSnapshot.LineupPlayer(
-                  player, player.position(), null, false, false, item.reason()));
+                  player, player.position(), null, false, false, item.reason(), null));
+        }
       }
     }
     return new SofaScoreLineupSnapshot.TeamLineup(source.formation(), players);
+  }
+
+  private SofaScorePlayerStatisticsSnapshot mapPlayerStatistics(JsonNode source) {
+    if (source == null || !source.isObject() || source.isEmpty()) return null;
+    Map<String, String> values = new LinkedHashMap<>();
+    source
+        .fields()
+        .forEachRemaining(
+            entry -> {
+              JsonNode value = entry.getValue();
+              if (value != null && !value.isNull()) {
+                JsonNode normalized =
+                    value.isObject() && value.has("value") ? value.get("value") : value;
+                if (normalized.isValueNode()) {
+                  values.put(entry.getKey(), normalized.asText());
+                }
+              }
+            });
+    return new SofaScorePlayerStatisticsSnapshot(source.toString(), values);
   }
 
   public List<SofaScoreIncidentSnapshot> toIncidents(
