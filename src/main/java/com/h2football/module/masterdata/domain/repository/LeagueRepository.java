@@ -13,8 +13,8 @@ import org.springframework.data.rest.core.annotation.RestResource;
 
 @RepositoryRestResource(collectionResourceRel = "leagues", path = "leagues")
 public interface LeagueRepository extends JpaRepository<League, Long> {
-
     boolean existsByCode(String code);
+    Optional<League> findByCode(String code);
 
     @Override
     @EntityGraph(attributePaths = "country")
@@ -32,31 +32,18 @@ public interface LeagueRepository extends JpaRepository<League, Long> {
     @EntityGraph(attributePaths = "country")
     Optional<League> findById(Long id);
 
-    @Override
-    @RestResource(exported = false)
+    @Override @RestResource(exported = false)
     <S extends League> S save(S entity);
-
-    @Override
-    @RestResource(exported = false)
+    @Override @RestResource(exported = false)
     <S extends League> List<S> saveAll(Iterable<S> entities);
-
-    @Override
-    @RestResource(exported = false)
+    @Override @RestResource(exported = false)
     void deleteById(Long id);
-
-    @Override
-    @RestResource(exported = false)
+    @Override @RestResource(exported = false)
     void delete(League entity);
-
-    @Override
-    @RestResource(exported = false)
+    @Override @RestResource(exported = false)
     void deleteAllById(Iterable<? extends Long> ids);
-
-    @Override
-    @RestResource(exported = false)
+    @Override @RestResource(exported = false)
     void deleteAll(Iterable<? extends League> entities);
-
-    @Override
-    @RestResource(exported = false)
+    @Override @RestResource(exported = false)
     void deleteAll();
 }

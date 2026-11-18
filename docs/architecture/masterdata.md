@@ -9,6 +9,14 @@ The masterdata module owns canonical countries, leagues, seasons and teams. Prov
 - `start_date` and `end_date` represent the actual competition period.
 - Season uniqueness is scoped to a league, not global.
 
+## External identities
+
+The `MasterDataExternalIdentity` entity maps a provider resource to its canonical record using the unique key:
+
+`resource_type + provider + external_id`
+
+The canonical ID remains independent of the provider ID. Import operations first resolve an existing identity, then reuse a natural-key match where possible, and only then create a canonical record. Provider adapters must call the masterdata import application service; they must not write canonical repositories directly.
+
 ## API
 
 - `POST/GET /api/v1/master-data/countries`
@@ -20,4 +28,4 @@ All writes are validated in API/application layers and protected by database con
 
 ## Follow-up boundary
 
-The external identity table is the persistence foundation for provider mappings. Provider-specific identity resolution and ingestion workflows will be implemented in the provider/ingestion phase, rather than coupling provider DTOs to these canonical entities.
+Provider identity resolution and ingestion workflows use the external identity foundation without coupling provider DTOs to canonical entities. Season records must not be imported until the source supplies trustworthy competition start and end dates.

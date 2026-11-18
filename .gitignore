@@ -9,3 +9,4 @@ target/
 *.log
 playwright/.cache/
 .browser-profile/
+.runtime/
