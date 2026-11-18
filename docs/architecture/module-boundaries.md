@@ -17,6 +17,7 @@ com.h2football
 │   ├── scheduling
 │   └── observability
 └── module
+    ├── identity
     ├── masterdata
     ├── match
     ├── provider
@@ -29,6 +30,12 @@ com.h2football
 ```
 
 Create subpackages only when real classes are introduced. Avoid empty package trees and generic catch-all packages such as `core`, `common`, `manager` or `utils`.
+
+## Identity boundary
+
+The identity module owns the shared mapping between provider resources and canonical H2 records. It is provider-agnostic and can map countries, leagues, seasons, teams, matches, players, coaches and venues without creating resource-specific mapping entities.
+
+The unique source key is `resource_type + provider + external_id`. A canonical ID is interpreted within its resource type; it intentionally has no polymorphic foreign key because it may reference different canonical tables. Resource-owning application services validate that the canonical record exists before registering a mapping.
 
 ## Provider boundary
 

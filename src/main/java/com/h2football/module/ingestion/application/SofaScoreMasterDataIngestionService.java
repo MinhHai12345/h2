@@ -1,5 +1,6 @@
 package com.h2football.module.ingestion.application;
 
+import com.h2football.module.identity.domain.model.Provider;
 import com.h2football.module.masterdata.application.MasterDataImportApplicationService;
 import com.h2football.module.masterdata.domain.model.Country;
 import com.h2football.module.provider.sofascore.SofaScoreMasterDataProvider;
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class SofaScoreMasterDataIngestionService {
-    private static final String PROVIDER = "SOFASCORE";
+    private static final Provider PROVIDER = Provider.SOFASCORE;
     private final SofaScoreMasterDataProvider provider;
     private final MasterDataImportApplicationService masterData;
 
