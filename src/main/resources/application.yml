@@ -1,0 +1,67 @@
+spring:
+  application:
+    name: h2-football
+  profiles:
+    default: dev
+  config:
+    import: optional:file:.env[.properties]
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:h2_football}?useUnicode=true&characterEncoding=utf8&serverTimezone=UTC
+    username: ${DB_USERNAME:h2football}
+    password: ${DB_PASSWORD:change-me}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: ${DB_POOL_MAX_SIZE:15}
+      minimum-idle: ${DB_POOL_MIN_IDLE:3}
+      connection-timeout: 30000
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+        jdbc.batch_size: 50
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: false
+  quartz:
+    job-store-type: memory
+    auto-startup: false
+    wait-for-jobs-to-complete-on-shutdown: true
+  jackson:
+    time-zone: UTC
+
+server:
+  port: ${SERVER_PORT:8080}
+  shutdown: graceful
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+app:
+  time-zone: ${APP_TIME_ZONE:UTC}
+  providers:
+    sofascore:
+      enabled: ${SOFASCORE_ENABLED:false}
+      web-url: ${SOFASCORE_WEB_URL:https://www.sofascore.com}
+      region: ${SOFASCORE_REGION:VN}
+      headless: ${SOFASCORE_HEADLESS:true}
+    understat:
+      enabled: ${UNDERSTAT_ENABLED:false}
+    football-data:
+      enabled: ${FOOTBALL_DATA_ENABLED:false}
+      api-key: ${FOOTBALL_DATA_API_KEY:}
+    football-data-uk:
+      enabled: ${FOOTBALL_DATA_UK_ENABLED:false}
