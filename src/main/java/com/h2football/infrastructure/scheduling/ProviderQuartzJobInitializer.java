@@ -21,8 +21,7 @@ import org.springframework.util.StringUtils;
 
 @Component
 public class ProviderQuartzJobInitializer implements ApplicationRunner {
-  private static final Logger log =
-      LoggerFactory.getLogger(ProviderQuartzJobInitializer.class);
+  private static final Logger log = LoggerFactory.getLogger(ProviderQuartzJobInitializer.class);
   private final ProviderIngestionProperties properties;
   private final CronJobApplicationService cronJobs;
 
