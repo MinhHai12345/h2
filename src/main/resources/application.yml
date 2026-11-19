@@ -31,7 +31,8 @@ spring:
     baseline-on-migrate: false
   quartz:
     job-store-type: memory
-    auto-startup: false
+    auto-startup: ${ANALYTICS_SCHEDULER_ENABLED:true}
+    overwrite-existing-jobs: true
     wait-for-jobs-to-complete-on-shutdown: true
   jackson:
     time-zone: UTC
@@ -55,6 +56,14 @@ app:
   ingestion:
     operations:
       api-key: ${INGESTION_ADMIN_API_KEY:}
+  analytics:
+    scheduler:
+      enabled: ${ANALYTICS_SCHEDULER_ENABLED:true}
+      providers: ${ANALYTICS_PROVIDERS:SOFASCORE}
+      lookahead-hours: ${ANALYTICS_LOOKAHEAD_HOURS:72}
+      refresh-after-minutes: ${ANALYTICS_REFRESH_AFTER_MINUTES:360}
+      match-refresh-cron: ${ANALYTICS_MATCH_REFRESH_CRON:0 0/30 * * * ?}
+      model-evaluation-cron: ${ANALYTICS_MODEL_EVALUATION_CRON:0 0 2 * * ?}
   providers:
     sofascore:
       enabled: ${SOFASCORE_ENABLED:false}

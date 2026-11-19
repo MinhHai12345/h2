@@ -2,10 +2,13 @@ package com.h2football.module.analytics.domain.repository;
 
 import com.h2football.module.analytics.domain.model.MatchPredictionSnapshot;
 import com.h2football.module.identity.domain.model.Provider;
+import com.h2football.module.match.domain.model.MatchStatus;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
 public interface MatchPredictionSnapshotRepository
     extends JpaRepository<MatchPredictionSnapshot, Long> {
@@ -16,4 +19,14 @@ public interface MatchPredictionSnapshotRepository
   List<MatchPredictionSnapshot>
       findAllByMatchSeasonIdAndProviderOrderByMatchKickoffAtAscComputedAtAsc(
           Long seasonId, Provider provider);
+
+  @Query(
+      """
+      select distinct snapshot.match.season.id
+      from MatchPredictionSnapshot snapshot
+      where snapshot.provider = :provider
+        and snapshot.match.status = :status
+      """)
+  List<Long> findDistinctSeasonIdsByProviderAndMatchStatus(
+      @Param("provider") Provider provider, @Param("status") MatchStatus status);
 }

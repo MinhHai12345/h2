@@ -24,8 +24,6 @@ MMO remains the legacy/reference application. H2-Football uses a new repository 
 
 For the first SofaScore ingestion flow, configure `SOFASCORE_ENABLED=true`, install the configured Playwright browser channel, set a private browser profile directory and configure a strong `INGESTION_ADMIN_API_KEY`. See [SofaScore master-data ingestion](docs/ingestion/sofascore-masterdata.md) for endpoint usage and current limitations.
 
-Compilation and tests have intentionally not been run during intermediate implementation steps. Run final verification only after the implementation batch is complete.
-
 ## Java formatting
 
 Java formatting is enforced by Spotless + google-java-format.
@@ -37,27 +35,10 @@ Java formatting is enforced by Spotless + google-java-format.
    git config core.hooksPath .githooks
    ```
 
-3. Commit normally. The `.githooks/pre-commit` hook runs:
+3. Commit normally. The `.githooks/pre-commit` hook runs `mvn -q spotless:apply` and stages changed tracked Java files.
+4. Run `mvn spotless:apply` to format manually or `mvn spotless:check` to verify without changing files.
 
-   ```bash
-   mvn -q spotless:apply
-   ```
-
-   Any formatting changes to tracked Java files are staged automatically.
-
-4. To format manually:
-
-   ```bash
-   mvn spotless:apply
-   ```
-
-5. To verify formatting without changing files:
-
-   ```bash
-   mvn spotless:check
-   ```
-
-The Git hook is installed once per clone; the workflow check runs in GitHub Actions for pull requests to `main` and pushes to `main`. Do not bypass the hook with `--no-verify`.
+The workflow check runs in GitHub Actions for pull requests to `main` and pushes to `main`. Do not bypass the hook with `--no-verify`.
 
 ## Database safety
 
@@ -101,7 +82,11 @@ Player Impact requires confirmed lineups for the target match. It uses only play
 
 Match Analytics v2 integrates confirmed-lineup attacking and defensive components into the Poisson + EMA expected-goals baseline. The adjustment is coverage-weighted and bounded to ±5%; missing or unconfirmed lineups preserve the baseline. Prediction snapshots are stored under the explicit model version `poisson-ema-player-impact-v2`, separate from earlier model versions.
 
-Model Evaluation automatically captures immutable pre-match probability snapshots and evaluates them against completed results. Reports are separated by model version and include multiclass Brier Score, Log Loss and ten-bin confidence calibration. See [Model Evaluation](docs/architecture/model-evaluation.md) and [Match Analytics](docs/architecture/match-analytics-engine.md).
+Model Evaluation captures immutable pre-match probability snapshots and evaluates them against completed results. Reports are separated by model version and include multiclass Brier Score, Log Loss and ten-bin confidence calibration. See [Model Evaluation](docs/architecture/model-evaluation.md) and [Match Analytics](docs/architecture/match-analytics-engine.md).
+
+## Analytics scheduling
+
+Quartz refreshes stale analytics for `NOT_STARTED` fixtures in the next 72 hours every 30 minutes and evaluates snapshots for finished matches daily at 02:00 UTC. Refreshes are rate-limited per match/provider to once every six hours by default. Configure providers, horizons and cron expressions through `ANALYTICS_*` environment variables. The current RAMJobStore is single-instance only; use a shared JDBC JobStore before horizontal scaling. See [Analytics Scheduling](docs/architecture/analytics-scheduling.md).
 
 ## Delivery phases
 
