@@ -13,7 +13,8 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 @DisallowConcurrentExecution
 public class ProviderSeasonWorkflowDispatchJob extends QuartzJobBean {
-  private static final Logger log = LoggerFactory.getLogger(ProviderSeasonWorkflowDispatchJob.class);
+  private static final Logger log =
+      LoggerFactory.getLogger(ProviderSeasonWorkflowDispatchJob.class);
 
   private final ProviderSeasonWorkflowSubmissionService submissions;
 

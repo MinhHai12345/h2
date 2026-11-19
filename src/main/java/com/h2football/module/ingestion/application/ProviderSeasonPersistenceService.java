@@ -112,8 +112,8 @@ public class ProviderSeasonPersistenceService {
                 .filter(
                     candidate ->
                         Duration.between(record.kickoffAt(), candidate.getKickoffAt())
-                            .abs()
-                            .compareTo(MATCH_IDENTITY_TOLERANCE)
+                                .abs()
+                                .compareTo(MATCH_IDENTITY_TOLERANCE)
                             <= 0)
                 .toList();
         if (candidates.size() > 1) {
@@ -150,13 +150,9 @@ public class ProviderSeasonPersistenceService {
         created++;
       } else {
         Integer homeScore =
-            linkedFromAnotherProvider && match.getHomeScore() != null
-                ? null
-                : record.homeScore();
+            linkedFromAnotherProvider && match.getHomeScore() != null ? null : record.homeScore();
         Integer awayScore =
-            linkedFromAnotherProvider && match.getAwayScore() != null
-                ? null
-                : record.awayScore();
+            linkedFromAnotherProvider && match.getAwayScore() != null ? null : record.awayScore();
         MatchStatus effectiveStatus =
             linkedFromAnotherProvider && match.getStatus() == MatchStatus.FINISHED
                 ? MatchStatus.FINISHED
