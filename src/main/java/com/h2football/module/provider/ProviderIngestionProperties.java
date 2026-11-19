@@ -32,30 +32,39 @@ public class ProviderIngestionProperties {
     public boolean isEnabled() {
       return enabled;
     }
+
     public void setEnabled(boolean enabled) {
       this.enabled = enabled;
     }
+
     public String getBaseUrl() {
       return baseUrl;
     }
+
     public void setBaseUrl(String baseUrl) {
       this.baseUrl = baseUrl;
     }
+
     public String getCron() {
       return cron;
     }
+
     public void setCron(String cron) {
       this.cron = cron;
     }
+
     public boolean isRunOnStartup() {
       return runOnStartup;
     }
+
     public void setRunOnStartup(boolean runOnStartup) {
       this.runOnStartup = runOnStartup;
     }
+
     public List<SeasonJob> getSeasons() {
       return seasons;
     }
+
     public void setSeasons(List<SeasonJob> seasons) {
       this.seasons = seasons == null ? new ArrayList<>() : new ArrayList<>(seasons);
     }
@@ -71,6 +80,7 @@ public class ProviderIngestionProperties {
     public String getApiKey() {
       return apiKey;
     }
+
     public void setApiKey(String apiKey) {
       this.apiKey = apiKey;
     }
@@ -96,18 +106,23 @@ public class ProviderIngestionProperties {
     public long getCanonicalSeasonId() {
       return canonicalSeasonId;
     }
+
     public void setCanonicalSeasonId(long canonicalSeasonId) {
       this.canonicalSeasonId = canonicalSeasonId;
     }
+
     public String getExternalLeagueId() {
       return externalLeagueId;
     }
+
     public void setExternalLeagueId(String externalLeagueId) {
       this.externalLeagueId = externalLeagueId;
     }
+
     public int getSeasonYear() {
       return seasonYear;
     }
+
     public void setSeasonYear(int seasonYear) {
       this.seasonYear = seasonYear;
     }

@@ -168,8 +168,7 @@ public class ProviderSeasonPersistenceService {
         provider, seasonId, records.size(), created, updated, linked, skipped);
   }
 
-  private void persistExpectedGoals(
-      Match match, Provider provider, ProviderMatchRecord record) {
+  private void persistExpectedGoals(Match match, Provider provider, ProviderMatchRecord record) {
     if (record.homeExpectedGoals() == null || record.awayExpectedGoals() == null) return;
     statistics.replaceFromProvider(
         match.getId(),
@@ -194,8 +193,7 @@ public class ProviderSeasonPersistenceService {
       List<Team> knownTeams) {
     String normalizedExternalId =
         externalId == null || externalId.isBlank() ? normalize(sourceName) : externalId.trim();
-    var mapped =
-        identities.findCanonicalId(ResourceType.TEAM, provider, normalizedExternalId);
+    var mapped = identities.findCanonicalId(ResourceType.TEAM, provider, normalizedExternalId);
     if (mapped.isPresent()) {
       return teams
           .findById(mapped.get())
@@ -214,10 +212,7 @@ public class ProviderSeasonPersistenceService {
       List<Team> leagueCountryCandidates =
           candidates.stream()
               .filter(
-                  team ->
-                      team.getCountry()
-                          .getId()
-                          .equals(season.getLeague().getCountry().getId()))
+                  team -> team.getCountry().getId().equals(season.getLeague().getCountry().getId()))
               .toList();
       if (leagueCountryCandidates.size() == 1) candidates = leagueCountryCandidates;
     }

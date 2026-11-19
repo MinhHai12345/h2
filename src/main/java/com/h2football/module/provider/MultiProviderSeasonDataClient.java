@@ -121,8 +121,7 @@ public class MultiProviderSeasonDataClient {
         webClientBuilder
             .baseUrl(config.getBaseUrl())
             .defaultHeader(
-                HttpHeaders.REFERER,
-                config.getBaseUrl() + "/league/" + league + "/" + seasonYear)
+                HttpHeaders.REFERER, config.getBaseUrl() + "/league/" + league + "/" + seasonYear)
             .defaultHeader("X-Requested-With", "XMLHttpRequest")
             .build()
             .get()
@@ -202,9 +201,7 @@ public class MultiProviderSeasonDataClient {
       String time = cell(header, row, "TIME");
       String home = cell(header, row, "HOMETEAM");
       String away = cell(header, row, "AWAYTEAM");
-      if (!StringUtils.hasText(date)
-          || !StringUtils.hasText(home)
-          || !StringUtils.hasText(away)) {
+      if (!StringUtils.hasText(date) || !StringUtils.hasText(home) || !StringUtils.hasText(away)) {
         continue;
       }
       LocalDate localDate;
