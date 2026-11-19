@@ -28,28 +28,33 @@ public class CronJobStateListener extends JobListenerSupport {
   @Override
   @Transactional
   public void jobToBeExecuted(JobExecutionContext context) {
-    find(context.getJobDetail().getKey()).ifPresent(job -> {
-      job.markRunning();
-      repository.save(job);
-    });
+    find(context.getJobDetail().getKey())
+        .ifPresent(
+            job -> {
+              job.markRunning();
+              repository.save(job);
+            });
   }
 
   @Override
   @Transactional
   public void jobWasExecuted(JobExecutionContext context, JobExecutionException exception) {
-    find(context.getJobDetail().getKey()).ifPresent(job -> {
-      Object result = context.getResult();
-      boolean failed = exception != null || result == CronJobExecutionStatus.ERROR;
-      String message = exception == null ? null : exception.getMessage();
-      job.recordExecution(
-          failed ? CronJobExecutionStatus.ERROR : CronJobExecutionStatus.SUCCESS,
-          message,
-          clock.instant());
-      repository.save(job);
-    });
+    find(context.getJobDetail().getKey())
+        .ifPresent(
+            job -> {
+              Object result = context.getResult();
+              boolean failed = exception != null || result == CronJobExecutionStatus.ERROR;
+              String message = exception == null ? null : exception.getMessage();
+              job.recordExecution(
+                  failed ? CronJobExecutionStatus.ERROR : CronJobExecutionStatus.SUCCESS,
+                  message,
+                  clock.instant());
+              repository.save(job);
+            });
   }
 
-  private java.util.Optional<com.h2football.module.operations.domain.model.CronJob> find(JobKey key) {
+  private java.util.Optional<com.h2football.module.operations.domain.model.CronJob> find(
+      JobKey key) {
     return repository.findByJobNameAndJobGroup(key.getName(), key.getGroup());
   }
 }
