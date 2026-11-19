@@ -1,7 +1,6 @@
 package com.h2football.infrastructure.scheduling;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -13,7 +12,6 @@ import java.util.Date;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.quartz.JobDetail;
@@ -51,7 +49,7 @@ class SofaScoreQuartzJobInitializerTest {
     assertEquals(17L, job.getJobDataMap().getLongValue("tournamentId"));
     assertEquals(52186L, job.getJobDataMap().getLongValue("sofaSeasonId"));
     assertEquals(42L, job.getJobDataMap().getLongValue("canonicalSeasonId"));
-    assertTrue(triggerCaptor.getValue().getKey().getGroup().equals("sofascore-ingestion"));
+    assertEquals("sofascore-ingestion", triggerCaptor.getValue().getKey().getGroup());
   }
 
   @Test
