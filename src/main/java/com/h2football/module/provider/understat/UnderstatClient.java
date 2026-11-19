@@ -25,9 +25,7 @@ public class UnderstatClient {
     if (!config.isEnabled()) {
       throw new IllegalStateException("Understat provider is disabled");
     }
-    if (!StringUtils.hasText(leagueSlug)
-        || leagueSlug.contains("/")
-        || leagueSlug.contains("..")) {
+    if (!StringUtils.hasText(leagueSlug) || leagueSlug.contains("/") || leagueSlug.contains("..")) {
       throw new IllegalArgumentException("A valid Understat league slug is required");
     }
     if (seasonYear < 2014) {
@@ -37,9 +35,12 @@ public class UnderstatClient {
         config.getBaseUrl(),
         "/getLeagueData/{league}/{season}",
         Map.of(
-            HttpHeaders.ACCEPT, "application/json, text/javascript, */*; q=0.01",
-            HttpHeaders.REFERER, config.getBaseUrl() + "/league/" + leagueSlug + "/" + seasonYear,
-            "X-Requested-With", "XMLHttpRequest"),
+            HttpHeaders.ACCEPT,
+            "application/json, text/javascript, */*; q=0.01",
+            HttpHeaders.REFERER,
+            config.getBaseUrl() + "/league/" + leagueSlug + "/" + seasonYear,
+            "X-Requested-With",
+            "XMLHttpRequest"),
         JsonNode.class,
         TIMEOUT,
         leagueSlug,

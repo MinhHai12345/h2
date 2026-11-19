@@ -58,10 +58,7 @@ public class SofaScoreMasterDataMapper {
     String isoCode = team.country() == null ? null : normalizeIsoCode(team.country().alpha2());
     String countryName = team.country() == null ? null : clean(team.country().name());
     return new SofaScoreTeamSnapshot(
-        team.id().toString(),
-        ProviderDataStandardizer.teamName(team.name()),
-        isoCode,
-        countryName);
+        team.id().toString(), ProviderDataStandardizer.teamName(team.name()), isoCode, countryName);
   }
 
   public static String canonicalStartYear(String label) {
