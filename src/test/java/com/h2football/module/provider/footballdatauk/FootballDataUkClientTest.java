@@ -20,20 +20,32 @@ class FootballDataUkClientTest {
     ProviderIngestionProperties properties = new ProviderIngestionProperties();
     properties.getFootballDataUk().setEnabled(true);
     FootballDataUkClient client = new FootballDataUkClient(http, properties);
-    byte[] content = "Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea"
-        .getBytes(Charset.forName("windows-1252"));
-    when(http.getBytes(properties.getFootballDataUk().getBaseUrl(),
-        "/mmz4281/{season}/{league}.csv",
-        Map.of(HttpHeaders.ACCEPT, "text/csv, text/plain, */*",
-            HttpHeaders.USER_AGENT, "H2-Football-Data-Importer/1.0"),
-        Duration.ofSeconds(45), "2425", "E0")).thenReturn(content);
+    byte[] content =
+        "Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea"
+            .getBytes(Charset.forName("windows-1252"));
+    when(
+            http.getBytes(
+                properties.getFootballDataUk().getBaseUrl(),
+                "/mmz4281/{season}/{league}.csv",
+                Map.of(
+                    HttpHeaders.ACCEPT, "text/csv, text/plain, */*",
+                    HttpHeaders.USER_AGENT, "H2-Football-Data-Importer/1.0"),
+                Duration.ofSeconds(45),
+                "2425",
+                "E0"))
+        .thenReturn(content);
 
-    assertEquals("Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea",
-        client.fetchSeasonCsv("e0", 2024));
-    verify(http).getBytes(properties.getFootballDataUk().getBaseUrl(),
-        "/mmz4281/{season}/{league}.csv",
-        Map.of(HttpHeaders.ACCEPT, "text/csv, text/plain, */*",
-            HttpHeaders.USER_AGENT, "H2-Football-Data-Importer/1.0"),
-        Duration.ofSeconds(45), "2425", "E0");
+    assertEquals(
+        "Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea", client.fetchSeasonCsv("e0", 2024));
+    verify(http)
+        .getBytes(
+            properties.getFootballDataUk().getBaseUrl(),
+            "/mmz4281/{season}/{league}.csv",
+            Map.of(
+                HttpHeaders.ACCEPT, "text/csv, text/plain, */*",
+                HttpHeaders.USER_AGENT, "H2-Football-Data-Importer/1.0"),
+            Duration.ofSeconds(45),
+            "2425",
+            "E0");
   }
 }

@@ -24,7 +24,9 @@ public class FootballDataClient {
 
   public synchronized JsonNode fetchCompetitionMatches(String competitionCode, int seasonYear) {
     var config = properties.getFootballData();
-    if (!config.isEnabled()) throw new IllegalStateException("Football-Data provider is disabled");
+    if (!config.isEnabled()) {
+      throw new IllegalStateException("Football-Data provider is disabled");
+    }
     if (!StringUtils.hasText(config.getApiKey())) {
       throw new IllegalStateException("FOOTBALL_DATA_API_KEY is required");
     }
@@ -33,9 +35,14 @@ public class FootballDataClient {
     }
     awaitRequestSlot();
     try {
-      return http.getJson(config.getBaseUrl(), "/competitions/{code}/matches?season={season}",
+      return http.getJson(
+          config.getBaseUrl(),
+          "/competitions/{code}/matches?season={season}",
           Map.of("X-Auth-Token", config.getApiKey(), HttpHeaders.ACCEPT, "application/json"),
-          JsonNode.class, TIMEOUT, competitionCode, seasonYear);
+          JsonNode.class,
+          TIMEOUT,
+          competitionCode,
+          seasonYear);
     } finally {
       nextAllowedRequestAtMillis = System.currentTimeMillis() + MIN_REQUEST_INTERVAL_MILLIS;
     }
@@ -43,12 +50,15 @@ public class FootballDataClient {
 
   private void awaitRequestSlot() {
     long waitMillis = nextAllowedRequestAtMillis - System.currentTimeMillis();
-    if (waitMillis <= 0) return;
+    if (waitMillis <= 0) {
+      return;
+    }
     try {
       Thread.sleep(waitMillis);
     } catch (InterruptedException exception) {
       Thread.currentThread().interrupt();
-      throw new IllegalStateException("Interrupted while waiting for football-data.org request slot", exception);
+      throw new IllegalStateException(
+          "Interrupted while waiting for football-data.org request slot", exception);
     }
   }
 }

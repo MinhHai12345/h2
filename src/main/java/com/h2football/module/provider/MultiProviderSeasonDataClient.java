@@ -50,8 +50,7 @@ public class MultiProviderSeasonDataClient {
     };
   }
 
-  private List<ProviderMatchRecord> fetchFootballData(
-      String competition, int seasonYear) {
+  private List<ProviderMatchRecord> fetchFootballData(String competition, int seasonYear) {
     JsonNode root = footballDataClient.fetchCompetitionMatches(competition, seasonYear);
     List<ProviderMatchRecord> records = new ArrayList<>();
     JsonNode matches = root == null ? null : root.path("matches");
@@ -60,11 +59,20 @@ public class MultiProviderSeasonDataClient {
         JsonNode home = match.path("homeTeam");
         JsonNode away = match.path("awayTeam");
         JsonNode score = match.path("score").path("fullTime");
-        records.add(new ProviderMatchRecord(
-            text(match, "id"), text(home, "id"), text(home, "name"),
-            text(away, "id"), text(away, "name"), instant(text(match, "utcDate"), null),
-            status(text(match, "status")), integer(score, "home"), integer(score, "away"),
-            text(match, "matchday"), null, null));
+        records.add(
+            new ProviderMatchRecord(
+                text(match, "id"),
+                text(home, "id"),
+                text(home, "name"),
+                text(away, "id"),
+                text(away, "name"),
+                instant(text(match, "utcDate"), null),
+                status(text(match, "status")),
+                integer(score, "home"),
+                integer(score, "away"),
+                text(match, "matchday"),
+                null,
+                null));
       }
     }
     return List.copyOf(records);
@@ -80,25 +88,38 @@ public class MultiProviderSeasonDataClient {
         JsonNode xg = match.path("xG");
         Integer homeScore = nullableInteger(goals, "h");
         Integer awayScore = nullableInteger(goals, "a");
-        boolean finished = match.path("isResult").asBoolean(false)
-            || (homeScore != null && awayScore != null);
-        records.add(new ProviderMatchRecord(
-            text(match, "id"), text(match, "h"), text(match, "home_team"),
-            text(match, "a"), text(match, "away_team"),
-            instant(text(match, "datetime"), UNDERSTAT_DATE),
-            finished ? "FINISHED" : "SCHEDULED", homeScore, awayScore,
-            text(match, "round"), decimal(xg, "h"), decimal(xg, "a")));
+        boolean finished =
+            match.path("isResult").asBoolean(false) || (homeScore != null && awayScore != null);
+        records.add(
+            new ProviderMatchRecord(
+                text(match, "id"),
+                text(match, "h"),
+                text(match, "home_team"),
+                text(match, "a"),
+                text(match, "away_team"),
+                instant(text(match, "datetime"), UNDERSTAT_DATE),
+                finished ? "FINISHED" : "SCHEDULED",
+                homeScore,
+                awayScore,
+                text(match, "round"),
+                decimal(xg, "h"),
+                decimal(xg, "a")));
       }
     }
     return List.copyOf(records);
   }
 
   private List<ProviderMatchRecord> fetchFootballDataUk(String leagueCode, int seasonYear) {
-    String seasonCode = String.format(Locale.ROOT, "%02d%02d", seasonYear % 100, (seasonYear + 1) % 100);
+    String seasonCode =
+        String.format(Locale.ROOT, "%02d%02d", seasonYear % 100, (seasonYear + 1) % 100);
     String csv = footballDataUkClient.fetchSeasonCsv(leagueCode, seasonYear);
-    if (!StringUtils.hasText(csv)) return List.of();
+    if (!StringUtils.hasText(csv)) {
+      return List.of();
+    }
     List<List<String>> rows = parseCsv(csv);
-    if (rows.isEmpty()) return List.of();
+    if (rows.isEmpty()) {
+      return List.of();
+    }
     List<String> header =
         rows.get(0).stream()
             .map(
@@ -175,17 +196,23 @@ public class MultiProviderSeasonDataClient {
         row.add(field.toString().trim());
         field.setLength(0);
       } else if ((current == '\n' || current == '\r') && !quoted) {
-        if (current == '\r' && i + 1 < csv.length() && csv.charAt(i + 1) == '\n') i++;
+        if (current == '\r' && i + 1 < csv.length() && csv.charAt(i + 1) == '\n') {
+          i++;
+        }
         row.add(field.toString().trim());
         field.setLength(0);
-        if (row.stream().anyMatch(StringUtils::hasText)) rows.add(List.copyOf(row));
+        if (row.stream().anyMatch(StringUtils::hasText)) {
+          rows.add(List.copyOf(row));
+        }
         row.clear();
       } else {
         field.append(current);
       }
     }
     row.add(field.toString().trim());
-    if (row.stream().anyMatch(StringUtils::hasText)) rows.add(List.copyOf(row));
+    if (row.stream().anyMatch(StringUtils::hasText)) {
+      rows.add(List.copyOf(row));
+    }
     return rows;
   }
 
@@ -213,7 +240,9 @@ public class MultiProviderSeasonDataClient {
   }
 
   private static BigDecimal decimal(String value) {
-    if (!StringUtils.hasText(value) || "-".equals(value)) return null;
+    if (!StringUtils.hasText(value) || "-".equals(value)) {
+      return null;
+    }
     try {
       BigDecimal result = new BigDecimal(value.trim());
       return result.signum() >= 0 ? result : null;
@@ -223,7 +252,9 @@ public class MultiProviderSeasonDataClient {
   }
 
   private static Integer parseInteger(String value) {
-    if (!StringUtils.hasText(value) || "-".equals(value)) return null;
+    if (!StringUtils.hasText(value) || "-".equals(value)) {
+      return null;
+    }
     try {
       return Integer.valueOf(value.trim());
     } catch (NumberFormatException exception) {
@@ -232,9 +263,13 @@ public class MultiProviderSeasonDataClient {
   }
 
   private static Instant instant(String value, DateTimeFormatter formatter) {
-    if (!StringUtils.hasText(value)) return Instant.EPOCH;
+    if (!StringUtils.hasText(value)) {
+      return Instant.EPOCH;
+    }
     try {
-      if (formatter == null) return Instant.parse(value);
+      if (formatter == null) {
+        return Instant.parse(value);
+      }
       return LocalDateTime.parse(value, formatter).toInstant(ZoneOffset.UTC);
     } catch (RuntimeException exception) {
       return Instant.EPOCH;

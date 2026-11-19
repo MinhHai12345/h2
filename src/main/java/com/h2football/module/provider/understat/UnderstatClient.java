@@ -22,15 +22,25 @@ public class UnderstatClient {
 
   public JsonNode fetchLeagueData(String leagueSlug, int seasonYear) {
     var config = properties.getUnderstat();
-    if (!config.isEnabled()) throw new IllegalStateException("Understat provider is disabled");
+    if (!config.isEnabled()) {
+      throw new IllegalStateException("Understat provider is disabled");
+    }
     if (!StringUtils.hasText(leagueSlug) || leagueSlug.contains("/") || leagueSlug.contains("..")) {
       throw new IllegalArgumentException("A valid Understat league slug is required");
     }
-    if (seasonYear < 2014) throw new IllegalArgumentException("Understat season must be 2014 or later");
-    return http.getJson(config.getBaseUrl(), "/getLeagueData/{league}/{season}",
-        Map.of(HttpHeaders.ACCEPT, "application/json, text/javascript, */*; q=0.01",
+    if (seasonYear < 2014) {
+      throw new IllegalArgumentException("Understat season must be 2014 or later");
+    }
+    return http.getJson(
+        config.getBaseUrl(),
+        "/getLeagueData/{league}/{season}",
+        Map.of(
+            HttpHeaders.ACCEPT, "application/json, text/javascript, */*; q=0.01",
             HttpHeaders.REFERER, config.getBaseUrl() + "/league/" + leagueSlug + "/" + seasonYear,
             "X-Requested-With", "XMLHttpRequest"),
-        JsonNode.class, TIMEOUT, leagueSlug, seasonYear);
+        JsonNode.class,
+        TIMEOUT,
+        leagueSlug,
+        seasonYear);
   }
 }
