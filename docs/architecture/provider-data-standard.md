@@ -62,9 +62,10 @@ Repositories never receive provider DTOs.
 ## Standardization policy
 
 `ProviderDataStandardizer` is the shared entry point for canonical league/team names.
-Known aliases are explicit and provider-neutral. Unknown names are preserved after trimming and
-whitespace compaction. Comparison keys fold accents and punctuation but deliberately retain generic
-club words to avoid false-positive team merges. Name similarity alone is not sufficient to link
+Known aliases are explicit and provider-neutral. Unknown names are preserved after trimming, Unicode normalization and
+whitespace compaction. Comparison keys fold accents and punctuation and ignore only common legal
+club designators (FC, AFC, CF, SC, etc.); meaningful name tokens remain to avoid false-positive
+team merges. The team alias catalogue follows the reviewed provider-neutral mapping maintained in MMO. Name similarity alone is not sufficient to link
 entities: provider external IDs take precedence, and ambiguous matches must be rejected.
 
 League/season mappings must be explicit where a provider competition code differs. SofaScore
