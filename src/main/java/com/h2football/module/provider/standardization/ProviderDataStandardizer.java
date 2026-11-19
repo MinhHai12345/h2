@@ -571,7 +571,7 @@ public final class ProviderDataStandardizer {
     return TEAM_NAME_ALIASES_BY_KEY.getOrDefault(teamAliasKey(cleaned), normalizeTeamDisplay(cleaned));
   }
 
-  /** Folds accents and punctuation but retains club words to avoid false-positive merges. */
+  /** Folds accents and punctuation, ignores common club designators, and retains meaningful name tokens. */
   public static String teamMatchKey(String sourceName) {
     String canonicalName = teamName(sourceName);
     if (canonicalName == null) return "";
