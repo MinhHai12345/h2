@@ -79,13 +79,12 @@ public class CronJobController {
       @RequestBody(required = false) TriggerRequest request) {
     ResponseEntity<?> denied = authorize(apiKey);
     if (denied != null) return denied;
-    Map<String, Long> parameters =
-        request == null
-            ? Map.of()
-            : Map.of(
-                "tournamentId", request.tournamentId(),
-                "sofaSeasonId", request.sofaSeasonId(),
-                "canonicalSeasonId", request.canonicalSeasonId());
+    java.util.Map<String, Long> parameters = new java.util.LinkedHashMap<>();
+    if (request != null) {
+      if (request.tournamentId() != null) parameters.put("tournamentId", request.tournamentId());
+      if (request.sofaSeasonId() != null) parameters.put("sofaSeasonId", request.sofaSeasonId());
+      if (request.canonicalSeasonId() != null) parameters.put("canonicalSeasonId", request.canonicalSeasonId());
+    }
     return ResponseEntity.ok(CronJobResponse.from(cronJobs.triggerNow(id, parameters)));
   }
 
