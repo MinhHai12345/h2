@@ -9,6 +9,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /** Reconciles configured SofaScore jobs with the application job registry. */
 @Component
@@ -28,17 +30,21 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     if (!properties.isEnabled()) {
-      log.info("SofaScore scheduled ingestion is disabled");
+      cronJobs.pauseGroup(JOB_GROUP);
+      log.info("SofaScore scheduled ingestion is disabled; existing jobs were paused");
       return;
     }
     if (properties.getSeasons().isEmpty()) {
-      log.warn("SofaScore scheduled ingestion is enabled but no seasons are configured");
+      cronJobs.pauseGroup(JOB_GROUP);
+      log.warn("SofaScore scheduled ingestion has no configured seasons; existing jobs were paused");
       return;
     }
 
+    Set<String> activeJobNames = new LinkedHashSet<>();
     for (SofaScoreIngestionJobProperties.Season season : properties.getSeasons()) {
       validate(season);
       String name = "season-" + season.getTournamentId() + "-" + season.getSofaSeasonId();
+      activeJobNames.add(name);
       JobDataMap data = new JobDataMap();
       data.put(SofaScoreSeasonMatchSyncJob.TOURNAMENT_ID, season.getTournamentId());
       data.put(SofaScoreSeasonMatchSyncJob.SOFA_SEASON_ID, season.getSofaSeasonId());
@@ -52,6 +58,7 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
           data);
       log.info("Reconciled SofaScore cron job {} with cron {} UTC", name, properties.getCron());
     }
+    cronJobs.deleteGroupExcept(JOB_GROUP, activeJobNames);
   }
 
   private void validate(SofaScoreIngestionJobProperties.Season season) {
