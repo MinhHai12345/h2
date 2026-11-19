@@ -167,7 +167,8 @@ public class SofaScoreMatchDetailIngestionService {
       Thread.sleep(delayMillis);
     } catch (InterruptedException exception) {
       Thread.currentThread().interrupt();
-      throw new IllegalStateException("SofaScore match-detail ingestion was interrupted", exception);
+      throw new IllegalStateException(
+          "SofaScore match-detail ingestion was interrupted", exception);
     }
   }
 
