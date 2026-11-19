@@ -1,12 +1,16 @@
 package com.h2football.infrastructure.scheduling;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobProperties;
 import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
 import com.h2football.module.operations.application.CronJobApplicationService;
+import com.h2football.module.operations.domain.model.CronJob;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -27,6 +31,16 @@ class SofaScoreQuartzJobInitializerTest {
     season.setSofaSeasonId(52186);
     season.setCanonicalSeasonId(42);
     properties.setSeasons(java.util.List.of(season));
+
+    when(cronJobs.registerOrUpdate(
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(JobDataMap.class)))
+        .thenReturn(
+            new CronJob(
+                "season-17-52186",
+                "sofascore-ingestion",
+                SofaScoreSeasonMatchSyncJob.class.getName(),
+                "0 15 2 * * ?",
+                "Synchronize SofaScore teams and match snapshots for configured season"));
 
     new SofaScoreQuartzJobInitializer(properties, cronJobs).run(null);
 

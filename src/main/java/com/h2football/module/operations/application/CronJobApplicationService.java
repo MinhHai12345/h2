@@ -27,7 +27,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 public class CronJobApplicationService {
   private static final Set<String> ALLOWED_JOB_CLASSES =
-      Set.of("com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob");
+      Set.of(
+          "com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob",
+          "com.h2football.module.ingestion.scheduling.SofaScoreLeagueCatalogueSyncJob");
   private static final Set<String> TRIGGER_PARAMETERS =
       Set.of("tournamentId", "sofaSeasonId", "canonicalSeasonId");
 

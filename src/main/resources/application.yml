@@ -74,7 +74,13 @@ app:
       job:
         enabled: ${SOFASCORE_INGESTION_JOB_ENABLED:false}
         cron: ${SOFASCORE_INGESTION_JOB_CRON:0 15 2 * * ?}
+        run-on-startup: ${SOFASCORE_INGESTION_JOB_RUN_ON_STARTUP:false}
         seasons: []
+        league-catalogue:
+          enabled: ${SOFASCORE_LEAGUE_CATALOGUE_JOB_ENABLED:false}
+          cron: ${SOFASCORE_LEAGUE_CATALOGUE_JOB_CRON:0 0 2 * * ?}
+          run-on-startup: ${SOFASCORE_LEAGUE_CATALOGUE_JOB_RUN_ON_STARTUP:false}
+          tournament-ids: []
   providers:
     sofascore:
       enabled: ${SOFASCORE_ENABLED:false}
