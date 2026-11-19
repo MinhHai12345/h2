@@ -16,10 +16,12 @@ public record ProviderSeasonWorkflowRequest(
         || externalLeagueId == null
         || externalLeagueId.isBlank()
         || seasonYear < 1900) {
-      throw new IllegalArgumentException("Provider, external league, season and idempotency key are required");
+      throw new IllegalArgumentException(
+          "Provider, external league, season and idempotency key are required");
     }
     if (provider == Provider.SOFASCORE) {
-      throw new IllegalArgumentException("Use the SofaScore season workflow for SofaScore ingestion");
+      throw new IllegalArgumentException(
+          "Use the SofaScore season workflow for SofaScore ingestion");
     }
     if (provider == Provider.UNDERSTAT && seasonYear < 2014) {
       throw new IllegalArgumentException("Understat supports seasons from 2014 onwards");

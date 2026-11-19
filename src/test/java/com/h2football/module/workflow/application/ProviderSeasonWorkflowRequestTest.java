@@ -10,8 +10,7 @@ class ProviderSeasonWorkflowRequestTest {
   @Test
   void shouldNormalizeExternalLeagueIdentifier() {
     var request =
-        new ProviderSeasonWorkflowRequest(
-            "fd-pl-2024", Provider.FOOTBALL_DATA, 10L, " PL ", 2024);
+        new ProviderSeasonWorkflowRequest("fd-pl-2024", Provider.FOOTBALL_DATA, 10L, " PL ", 2024);
 
     assertThat(request.externalLeagueId()).isEqualTo("PL");
   }
@@ -20,8 +19,7 @@ class ProviderSeasonWorkflowRequestTest {
   void shouldRejectSofaScoreBecauseItHasItsOwnIngestionPipeline() {
     assertThatThrownBy(
             () ->
-                new ProviderSeasonWorkflowRequest(
-                    "sofa-2024", Provider.SOFASCORE, 10L, "17", 2024))
+                new ProviderSeasonWorkflowRequest("sofa-2024", Provider.SOFASCORE, 10L, "17", 2024))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("SofaScore ingestion");
   }

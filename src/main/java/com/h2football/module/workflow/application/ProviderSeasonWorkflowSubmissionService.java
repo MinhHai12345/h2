@@ -35,7 +35,9 @@ public class ProviderSeasonWorkflowSubmissionService {
     seasons
         .findById(request.canonicalSeasonId())
         .orElseThrow(
-            () -> new IllegalArgumentException("Unknown canonical season " + request.canonicalSeasonId()));
+            () ->
+                new IllegalArgumentException(
+                    "Unknown canonical season " + request.canonicalSeasonId()));
     definitions.getRequired(WORKFLOW_TYPE);
     String payload;
     try {

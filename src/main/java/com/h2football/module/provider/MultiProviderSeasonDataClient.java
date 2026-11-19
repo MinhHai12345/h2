@@ -41,11 +41,13 @@ public class MultiProviderSeasonDataClient {
       case UNDERSTAT -> fetchUnderstat(externalLeagueId, seasonYear);
       case FOOTBALL_DATA -> fetchFootballData(externalLeagueId, seasonYear);
       case FOOTBALL_DATA_UK -> fetchFootballDataUk(externalLeagueId, seasonYear);
-      case SOFASCORE -> throw new IllegalArgumentException("SofaScore uses its dedicated ingestion pipeline");
+      case SOFASCORE ->
+          throw new IllegalArgumentException("SofaScore uses its dedicated ingestion pipeline");
     };
   }
 
-  private synchronized List<ProviderMatchRecord> fetchFootballData(String competition, int seasonYear) {
+  private synchronized List<ProviderMatchRecord> fetchFootballData(
+      String competition, int seasonYear) {
     var config = properties.getFootballData();
     if (!config.isEnabled()) throw new IllegalStateException("Football-Data provider is disabled");
     if (!StringUtils.hasText(config.getApiKey())) {
@@ -107,7 +109,8 @@ public class MultiProviderSeasonDataClient {
       Thread.sleep(waitMillis);
     } catch (InterruptedException exception) {
       Thread.currentThread().interrupt();
-      throw new IllegalStateException("Interrupted while waiting for football-data.org request slot", exception);
+      throw new IllegalStateException(
+          "Interrupted while waiting for football-data.org request slot", exception);
     }
   }
 
@@ -117,7 +120,9 @@ public class MultiProviderSeasonDataClient {
     JsonNode root =
         webClientBuilder
             .baseUrl(config.getBaseUrl())
-            .defaultHeader(HttpHeaders.REFERER, config.getBaseUrl() + "/league/" + league + "/" + seasonYear)
+            .defaultHeader(
+                HttpHeaders.REFERER,
+                config.getBaseUrl() + "/league/" + league + "/" + seasonYear)
             .defaultHeader("X-Requested-With", "XMLHttpRequest")
             .build()
             .get()
@@ -141,7 +146,8 @@ public class MultiProviderSeasonDataClient {
         BigDecimal awayXg = decimal(xg, "a");
         Integer homeScore = nullableInteger(goals, "h");
         Integer awayScore = nullableInteger(goals, "a");
-        boolean finished = match.path("isResult").asBoolean(false) || (homeScore != null && awayScore != null);
+        boolean finished =
+            match.path("isResult").asBoolean(false) || (homeScore != null && awayScore != null);
         records.add(
             new ProviderMatchRecord(
                 matchId,
@@ -163,7 +169,9 @@ public class MultiProviderSeasonDataClient {
 
   private List<ProviderMatchRecord> fetchFootballDataUk(String leagueCode, int seasonYear) {
     var config = properties.getFootballDataUk();
-    if (!config.isEnabled()) throw new IllegalStateException("Football-Data UK provider is disabled");
+    if (!config.isEnabled()) {
+      throw new IllegalStateException("Football-Data UK provider is disabled");
+    }
     String seasonCode =
         String.format(Locale.ROOT, "%02d%02d", seasonYear % 100, (seasonYear + 1) % 100);
     String csv =
@@ -180,7 +188,12 @@ public class MultiProviderSeasonDataClient {
     if (rows.isEmpty()) return List.of();
     List<String> header =
         rows.get(0).stream()
-            .map(value -> value.replace(String.valueOf((char) 0xFEFF), "").trim().toUpperCase(Locale.ROOT))
+            .map(
+                value ->
+                    value
+                        .replace(String.valueOf((char) 0xFEFF), "")
+                        .trim()
+                        .toUpperCase(Locale.ROOT))
             .toList();
     List<ProviderMatchRecord> records = new ArrayList<>();
     for (int index = 1; index < rows.size(); index++) {
@@ -189,7 +202,11 @@ public class MultiProviderSeasonDataClient {
       String time = cell(header, row, "TIME");
       String home = cell(header, row, "HOMETEAM");
       String away = cell(header, row, "AWAYTEAM");
-      if (!StringUtils.hasText(date) || !StringUtils.hasText(home) || !StringUtils.hasText(away)) continue;
+      if (!StringUtils.hasText(date)
+          || !StringUtils.hasText(home)
+          || !StringUtils.hasText(away)) {
+        continue;
+      }
       LocalDate localDate;
       try {
         localDate = LocalDate.parse(date, UK_DATE);

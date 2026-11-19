@@ -19,8 +19,7 @@ public class ProviderDataReadinessStageHandler implements WorkflowStageHandler {
   public String execute(WorkflowExecutionContext context) throws Exception {
     ProviderSeasonWorkflowRequest request =
         objectMapper.readValue(context.requestPayload(), ProviderSeasonWorkflowRequest.class);
-    DataReadinessReport report =
-        readiness.inspect(request.canonicalSeasonId(), request.provider());
+    DataReadinessReport report = readiness.inspect(request.canonicalSeasonId(), request.provider());
     if (!report.consistent()) {
       throw new WorkflowStageRejectedException(
           "Data readiness gate rejected season "

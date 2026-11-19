@@ -50,7 +50,8 @@ public class ProviderSeasonPersistenceService {
     Season season =
         seasons
             .findById(seasonId)
-            .orElseThrow(() -> new IllegalArgumentException("Unknown canonical season " + seasonId));
+            .orElseThrow(
+                () -> new IllegalArgumentException("Unknown canonical season " + seasonId));
     List<Team> knownTeams = new ArrayList<>(teams.findAll());
     List<Match> canonicalMatches =
         new ArrayList<>(matches.findAllBySeasonIdOrderByKickoffAtAsc(seasonId));

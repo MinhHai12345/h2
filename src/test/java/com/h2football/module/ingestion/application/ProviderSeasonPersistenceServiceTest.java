@@ -9,15 +9,16 @@ import static org.mockito.Mockito.when;
 import com.h2football.module.identity.application.ExternalIdentityService;
 import com.h2football.module.identity.domain.model.Provider;
 import com.h2football.module.identity.domain.model.ResourceType;
-import com.h2football.module.match.application.MatchStatisticsApplicationService;
-import com.h2football.module.match.domain.model.Match;
-import com.h2football.module.match.domain.repository.MatchRepository;
 import com.h2football.module.masterdata.domain.model.Country;
 import com.h2football.module.masterdata.domain.model.League;
 import com.h2football.module.masterdata.domain.model.Season;
 import com.h2football.module.masterdata.domain.model.Team;
 import com.h2football.module.masterdata.domain.repository.SeasonRepository;
 import com.h2football.module.masterdata.domain.repository.TeamRepository;
+import com.h2football.module.match.application.MatchStatisticsApplicationService;
+import com.h2football.module.match.domain.model.Match;
+import com.h2football.module.match.domain.model.MatchStatus;
+import com.h2football.module.match.domain.repository.MatchRepository;
 import com.h2football.module.provider.MultiProviderSeasonDataClient.ProviderMatchRecord;
 import java.math.BigDecimal;
 import java.time.Instant;
@@ -140,6 +141,7 @@ class ProviderSeasonPersistenceServiceTest {
                         && values.get(0).homeValue().compareTo(new BigDecimal("1.42")) == 0
                         && values.get(0).awayValue().compareTo(new BigDecimal("0.87")) == 0));
   }
+
   @Test
   void shouldLinkASecondProviderFixtureToTheExistingCanonicalMatch() {
     Instant kickoff = Instant.parse("2024-08-16T19:00:00Z");
@@ -162,7 +164,7 @@ class ProviderSeasonPersistenceServiceTest {
     when(existingMatch.getAwayTeam()).thenReturn(away);
     when(existingMatch.getKickoffAt()).thenReturn(kickoff);
     when(existingMatch.getId()).thenReturn(300L);
-    when(existingMatch.getStatus()).thenReturn(com.h2football.module.match.domain.model.MatchStatus.FINISHED);
+    when(existingMatch.getStatus()).thenReturn(MatchStatus.FINISHED);
     when(existingMatch.getHomeScore()).thenReturn(1);
     when(existingMatch.getAwayScore()).thenReturn(0);
 
@@ -191,8 +193,7 @@ class ProviderSeasonPersistenceServiceTest {
     assertThat(result.linkedToExistingMatches()).isEqualTo(1);
     verify(identities).register(ResourceType.MATCH, Provider.FOOTBALL_DATA, "match-3", 300L);
     verify(existingMatch)
-        .updateSnapshot(kickoff, com.h2football.module.match.domain.model.MatchStatus.FINISHED, null, null, "1");
+        .updateSnapshot(kickoff, MatchStatus.FINISHED, null, null, "1");
     verify(matches, never()).save(any(Match.class));
   }
-
 }
