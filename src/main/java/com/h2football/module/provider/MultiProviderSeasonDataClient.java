@@ -2,6 +2,9 @@ package com.h2football.module.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.h2football.module.identity.domain.model.Provider;
+import com.h2football.module.provider.footballdata.FootballDataClient;
+import com.h2football.module.provider.footballdatauk.FootballDataUkClient;
+import com.h2football.module.provider.understat.UnderstatClient;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
