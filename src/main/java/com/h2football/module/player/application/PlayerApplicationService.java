@@ -40,7 +40,7 @@ public class PlayerApplicationService {
           input.countryName());
       return existing.getId();
     }
-    Player saved =
+    Player canonical =
         players.save(
             new Player(
                 input.name(),
@@ -49,8 +49,8 @@ public class PlayerApplicationService {
                 input.position(),
                 input.countryCode(),
                 input.countryName()));
-    identities.register(ResourceType.PLAYER, provider, externalId, saved.getId());
-    return saved.getId();
+    identities.register(ResourceType.PLAYER, provider, externalId, canonical.getId());
+    return canonical.getId();
   }
 
   public record PlayerInput(

@@ -9,6 +9,8 @@ import com.h2football.module.masterdata.domain.model.Team;
 import com.h2football.module.masterdata.domain.repository.CountryRepository;
 import com.h2football.module.masterdata.domain.repository.LeagueRepository;
 import com.h2football.module.masterdata.domain.repository.TeamRepository;
+import com.h2football.module.provider.standardization.ProviderDataStandardizer;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -59,7 +61,7 @@ public class MasterDataImportApplicationService {
       Provider provider, String externalId, String code, String name, Long countryId) {
     String sourceId = normalize(externalId, "externalId");
     String normalizedCode = normalize(code, "code").toUpperCase();
-    String leagueName = normalize(name, "name");
+    String leagueName = ProviderDataStandardizer.leagueName(normalize(name, "name"));
 
     Long canonicalId =
         identities.findCanonicalId(ResourceType.LEAGUE, provider, sourceId).orElse(null);
@@ -76,17 +78,40 @@ public class MasterDataImportApplicationService {
         countries
             .findById(countryId)
             .orElseThrow(() -> new MasterDataNotFoundException("Country", countryId));
-    League league =
-        leagues
-            .findByCode(normalizedCode)
-            .orElseGet(() -> leagues.save(new League(normalizedCode, leagueName, country)));
+    List<League> candidates =
+        leagues.findAll().stream()
+            .filter(item -> item.getCountry().getId().equals(countryId))
+            .filter(
+                item ->
+                    ProviderDataStandardizer.leagueMatchKey(item.getName())
+                        .equals(ProviderDataStandardizer.leagueMatchKey(leagueName)))
+            .toList();
+    if (candidates.size() > 1) {
+      throw new IllegalStateException(
+          "Ambiguous canonical league identity for provider " + provider + ": " + leagueName);
+    }
+    League league;
+    if (candidates.size() == 1) {
+      league = candidates.get(0);
+    } else {
+      League existingByCode = leagues.findByCode(normalizedCode).orElse(null);
+      if (existingByCode != null && !existingByCode.getCountry().getId().equals(countryId)) {
+        throw new IllegalStateException(
+            "Provider league code is already used by a different canonical country: "
+                + normalizedCode);
+      }
+      league =
+          existingByCode != null
+              ? existingByCode
+              : leagues.save(new League(normalizedCode, leagueName, country));
+    }
     identities.register(ResourceType.LEAGUE, provider, sourceId, league.getId());
     return league;
   }
 
   public Team importTeam(Provider provider, String externalId, String name, Long countryId) {
     String sourceId = normalize(externalId, "externalId");
-    String teamName = normalize(name, "name");
+    String teamName = ProviderDataStandardizer.teamName(normalize(name, "name"));
 
     Long canonicalId =
         identities.findCanonicalId(ResourceType.TEAM, provider, sourceId).orElse(null);
@@ -103,10 +128,22 @@ public class MasterDataImportApplicationService {
         countries
             .findById(countryId)
             .orElseThrow(() -> new MasterDataNotFoundException("Country", countryId));
+    List<Team> candidates =
+        teams.findAll().stream()
+            .filter(item -> item.getCountry().getId().equals(countryId))
+            .filter(
+                item ->
+                    ProviderDataStandardizer.teamMatchKey(item.getName())
+                        .equals(ProviderDataStandardizer.teamMatchKey(teamName)))
+            .toList();
+    if (candidates.size() > 1) {
+      throw new IllegalStateException(
+          "Ambiguous canonical team identity for provider " + provider + ": " + teamName);
+    }
     Team team =
-        teams
-            .findByCountryIdAndNameIgnoreCase(countryId, teamName)
-            .orElseGet(() -> teams.save(new Team(teamName, country)));
+        candidates.size() == 1
+            ? candidates.get(0)
+            : teams.save(new Team(teamName, country));
     identities.register(ResourceType.TEAM, provider, sourceId, team.getId());
     return team;
   }

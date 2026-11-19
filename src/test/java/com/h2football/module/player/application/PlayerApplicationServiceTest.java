@@ -56,6 +56,30 @@ class PlayerApplicationServiceTest {
   }
 
   @Test
+  void doesNotAutoLinkPlayerByNameAndCountryWithoutProviderIdentity() {
+    Player existing = mock(Player.class);
+    Player saved = mock(Player.class);
+    when(existing.getName()).thenReturn("Alex Smith");
+    when(existing.getCountryCode()).thenReturn("GB");
+    when(saved.getId()).thenReturn(89L);
+    when(identities.findCanonicalId(any(), eq(Provider.UNDERSTAT), eq("player-new")))
+        .thenReturn(Optional.empty());
+    when(players.findAll()).thenReturn(java.util.List.of(existing));
+    when(players.save(any(Player.class))).thenReturn(saved);
+
+    Long id =
+        service.upsertFromProvider(
+            Provider.UNDERSTAT,
+            "player-new",
+            new PlayerApplicationService.PlayerInput(
+                "Alex Smith", null, null, null, "GB", "England"));
+
+    assertThat(id).isEqualTo(89L);
+    verify(players).save(any(Player.class));
+    verify(identities).register(any(), eq(Provider.UNDERSTAT), eq("player-new"), eq(89L));
+  }
+
+  @Test
   void preservesOptionalProfileFieldsWhenProviderReturnsPartialPlayer() {
     Player player = new Player("Player One", "P. One", "player-one", "F", "BR", "Brazil");
 
