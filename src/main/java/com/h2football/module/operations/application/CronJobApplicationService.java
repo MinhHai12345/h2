@@ -3,6 +3,9 @@ package com.h2football.module.operations.application;
 import com.h2football.module.operations.domain.model.CronJob;
 import com.h2football.module.operations.domain.model.CronJobStatus;
 import com.h2football.module.operations.domain.repository.CronJobRepository;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -29,10 +32,13 @@ public class CronJobApplicationService {
 
   private final Scheduler scheduler;
   private final CronJobRepository repository;
+  private final ObjectMapper objectMapper;
 
-  public CronJobApplicationService(Scheduler scheduler, CronJobRepository repository) {
+  public CronJobApplicationService(
+      Scheduler scheduler, CronJobRepository repository, ObjectMapper objectMapper) {
     this.scheduler = scheduler;
     this.repository = repository;
+    this.objectMapper = objectMapper;
   }
 
   @Transactional(readOnly = true)
@@ -55,8 +61,11 @@ public class CronJobApplicationService {
             .findByJobNameAndJobGroup(name, group)
             .orElseGet(() -> new CronJob(name, group, jobClass, cronExpression, description));
     job.updateDefinition(jobClass, cronExpression, description);
+    if (jobData != null) {
+      job.updateJobData(serializeJobData(jobData));
+    }
     CronJob saved = repository.save(job);
-    schedule(saved, jobData);
+    schedule(saved, jobData == null ? deserializeJobData(saved.getJobDataJson()) : jobData);
     return saved;
   }
 
@@ -205,7 +214,7 @@ public class CronJobApplicationService {
     if (scheduler.checkExists(key)) {
       return;
     }
-    JobDataMap jobData = new JobDataMap();
+    JobDataMap jobData = deserializeJobData(job.getJobDataJson());
     scheduler.addJob(
         JobBuilder.newJob(resolveJobClass(job.getJobClass()))
             .withIdentity(key)
@@ -224,6 +233,27 @@ public class CronJobApplicationService {
                 .inTimeZone(java.util.TimeZone.getTimeZone("UTC"))
                 .withMisfireHandlingInstructionDoNothing())
         .build();
+  }
+
+  private String serializeJobData(JobDataMap jobData) {
+    try {
+      return objectMapper.writeValueAsString(jobData.getWrappedMap());
+    } catch (JsonProcessingException exception) {
+      throw new CronJobOperationException("Unable to serialize cron job parameters", exception);
+    }
+  }
+
+  private JobDataMap deserializeJobData(String json) {
+    if (json == null || json.isBlank()) {
+      return new JobDataMap();
+    }
+    try {
+      Map<String, Object> values =
+          objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+      return new JobDataMap(values);
+    } catch (JsonProcessingException exception) {
+      throw new CronJobOperationException("Unable to restore cron job parameters", exception);
+    }
   }
 
   private Class<? extends org.quartz.Job> resolveJobClass(String className) {
