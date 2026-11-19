@@ -1,6 +1,8 @@
 package com.h2football.module.analytics.application;
 
 import com.h2football.module.analytics.application.MatchAnalyticsCalculator.MatchProbabilities;
+import com.h2football.module.analytics.application.PlayerImpactApplicationService.MatchPlayerImpactResponse;
+import com.h2football.module.analytics.application.PlayerImpactApplicationService.TeamImpact;
 import com.h2football.module.analytics.domain.model.MatchAnalytics;
 import com.h2football.module.analytics.domain.model.MatchAnalyticsStatus;
 import com.h2football.module.analytics.domain.repository.MatchAnalyticsRepository;
@@ -30,12 +32,13 @@ public class MatchAnalyticsApplicationService {
   private static final int XG_HISTORY_LIMIT = 10;
   private static final String EXPECTED_GOALS_KEY = "expectedGoals";
   private static final String ALL_PERIOD = "ALL";
-  private static final String MODEL_VERSION = "poisson-ema-v1";
+  private static final String MODEL_VERSION = "poisson-ema-player-impact-v2";
 
   private final MatchRepository matches;
   private final MatchStatisticRepository matchStatistics;
   private final MatchAnalyticsRepository analytics;
   private final MatchAnalyticsCalculator calculator;
+  private final PlayerImpactApplicationService playerImpact;
   private final ModelEvaluationApplicationService modelEvaluation;
   private final Clock clock;
 
@@ -44,12 +47,14 @@ public class MatchAnalyticsApplicationService {
       MatchStatisticRepository matchStatistics,
       MatchAnalyticsRepository analytics,
       MatchAnalyticsCalculator calculator,
+      PlayerImpactApplicationService playerImpact,
       ModelEvaluationApplicationService modelEvaluation,
       Clock clock) {
     this.matches = matches;
     this.matchStatistics = matchStatistics;
     this.analytics = analytics;
     this.calculator = calculator;
+    this.playerImpact = playerImpact;
     this.modelEvaluation = modelEvaluation;
     this.clock = clock;
   }
@@ -115,6 +120,24 @@ public class MatchAnalyticsApplicationService {
           awayXgFor.add(homeXgAgainst).divide(BigDecimal.valueOf(2), 6, RoundingMode.HALF_UP);
       BigDecimal homeLambda = calculator.adjustExpectedGoals(baseHome, homeForm, awayForm);
       BigDecimal awayLambda = calculator.adjustExpectedGoals(baseAway, awayForm, homeForm);
+
+      MatchPlayerImpactResponse impact = playerImpact.calculate(target.getId(), provider);
+      BigDecimal combinedCoverage = combinedCoverage(impact);
+      TeamImpact homeImpact = impact == null ? null : impact.home();
+      TeamImpact awayImpact = impact == null ? null : impact.away();
+      homeLambda =
+          calculator.adjustExpectedGoalsByPlayerImpact(
+              homeLambda,
+              homeImpact == null ? null : homeImpact.averageAttackingIndex(),
+              awayImpact == null ? null : awayImpact.averageDefensiveIndex(),
+              combinedCoverage);
+      awayLambda =
+          calculator.adjustExpectedGoalsByPlayerImpact(
+              awayLambda,
+              awayImpact == null ? null : awayImpact.averageAttackingIndex(),
+              homeImpact == null ? null : homeImpact.averageDefensiveIndex(),
+              combinedCoverage);
+
       MatchProbabilities probabilities = calculator.calculateProbabilities(homeLambda, awayLambda);
       snapshot =
           new MatchAnalyticsSnapshot(
@@ -134,6 +157,19 @@ public class MatchAnalyticsApplicationService {
               null);
     }
     return persist(target, provider, snapshot);
+  }
+
+  private BigDecimal combinedCoverage(MatchPlayerImpactResponse impact) {
+    if (impact == null
+        || impact.home() == null
+        || impact.away() == null
+        || !impact.home().lineupConfirmed()
+        || !impact.away().lineupConfirmed()
+        || impact.home().dataCoveragePercent() == null
+        || impact.away().dataCoveragePercent() == null) {
+      return BigDecimal.ZERO;
+    }
+    return impact.home().dataCoveragePercent().min(impact.away().dataCoveragePercent());
   }
 
   private Map<Long, MatchStatistic> loadExpectedGoals(List<Match> history, Provider provider) {

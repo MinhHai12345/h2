@@ -99,7 +99,9 @@ The application connects to the `h2_football` schema by default. Never point thi
 
 Player Impact requires confirmed lineups for the target match. It uses only player match-statistic observations from finished matches in the same season before the target kickoff. Its 0–100 component-weighted index is descriptive; missing historical data remains null and is reported through team data coverage.
 
-Model Evaluation automatically captures immutable pre-match probability snapshots and evaluates them against completed results. Reports are separated by model version and include multiclass Brier Score, Log Loss and ten-bin confidence calibration. See [Model Evaluation](docs/architecture/model-evaluation.md).
+Match Analytics v2 integrates confirmed-lineup attacking and defensive components into the Poisson + EMA expected-goals baseline. The adjustment is coverage-weighted and bounded to ±5%; missing or unconfirmed lineups preserve the baseline. Prediction snapshots are stored under the explicit model version `poisson-ema-player-impact-v2`, separate from earlier model versions.
+
+Model Evaluation automatically captures immutable pre-match probability snapshots and evaluates them against completed results. Reports are separated by model version and include multiclass Brier Score, Log Loss and ten-bin confidence calibration. See [Model Evaluation](docs/architecture/model-evaluation.md) and [Match Analytics](docs/architecture/match-analytics-engine.md).
 
 ## Delivery phases
 
