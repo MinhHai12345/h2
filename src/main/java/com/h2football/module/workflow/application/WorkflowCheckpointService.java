@@ -28,9 +28,15 @@ public class WorkflowCheckpointService {
   @Transactional
   public WorkflowRun createOrLoad(String type, String key, String payload) {
     runs.insertIfAbsent(type, key, payload);
-    return runs.findByWorkflowTypeAndIdempotencyKey(type, key)
-        .orElseThrow(
-            () -> new IllegalStateException("Workflow run could not be created or loaded"));
+    WorkflowRun run =
+        runs.findByWorkflowTypeAndIdempotencyKey(type, key)
+            .orElseThrow(
+                () -> new IllegalStateException("Workflow run could not be created or loaded"));
+    if (!run.getRequestPayload().equals(payload)) {
+      throw new IllegalArgumentException(
+          "The idempotency key is already associated with a different workflow request");
+    }
+    return run;
   }
 
   @Transactional

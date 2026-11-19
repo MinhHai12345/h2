@@ -64,6 +64,9 @@ public class WorkflowCoordinator {
                             actualAttempt));
             checkpoints.completeStage(run.getId(), owner, stage.key(), checkpoint);
             completed = true;
+          } catch (WorkflowStageRejectedException exception) {
+            checkpoints.failStage(run.getId(), owner, stage.key(), exception.getMessage());
+            throw exception;
           } catch (Exception exception) {
             checkpoints.failStage(run.getId(), owner, stage.key(), exception.getMessage());
             log.warn(
