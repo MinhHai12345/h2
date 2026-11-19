@@ -62,6 +62,7 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
             catalogue.getCron(),
             "Synchronize SofaScore tournament and season catalogue",
             data);
+    job = resumeIfPaused(job);
 
     if (catalogue.isRunOnStartup()) {
       cronJobs.triggerNow(job.getId(), Map.of());
@@ -98,6 +99,7 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
               properties.getCron(),
               "Synchronize SofaScore teams and match snapshots for configured season",
               data);
+      job = resumeIfPaused(job);
       if (properties.isRunOnStartup()) {
         cronJobs.triggerNow(job.getId(), Map.of());
         log.info("Triggered initial SofaScore season synchronization for {}", name);
