@@ -27,8 +27,7 @@ class PlayerImpactCalculatorTest {
   @Test
   void calculatesRoleAwareForwardImpactFromRecentObservations() {
     var result =
-        calculator.calculate(
-            List.of(stat(90, 2, 4, 2, 1, 0, 0, 1, "0.8", "0.2", "7.5")), "F");
+        calculator.calculate(List.of(stat(90, 2, 4, 2, 1, 0, 0, 1, "0.8", "0.2", "7.5")), "F");
 
     assertThat(result.score()).isNotNull().isBetween(BigDecimal.ZERO, BigDecimal.valueOf(100));
     assertThat(result.attackingIndex()).isNotNull();
@@ -39,9 +38,7 @@ class PlayerImpactCalculatorTest {
 
   @Test
   void returnsMissingScoreWhenNoHistoricalMinutesExist() {
-    var result =
-        calculator.calculate(
-            List.of(stat(0, 0, 0, 0, 0, 0, 0, 0, null, null, null)), "D");
+    var result = calculator.calculate(List.of(stat(0, 0, 0, 0, 0, 0, 0, 0, null, null, null)), "D");
 
     assertThat(result.score()).isNull();
     assertThat(result.minutesObserved()).isZero();

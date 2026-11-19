@@ -36,6 +36,7 @@ public class MatchAnalyticsApplicationService {
   private final MatchStatisticRepository matchStatistics;
   private final MatchAnalyticsRepository analytics;
   private final MatchAnalyticsCalculator calculator;
+  private final ModelEvaluationApplicationService modelEvaluation;
   private final Clock clock;
 
   public MatchAnalyticsApplicationService(
@@ -43,11 +44,13 @@ public class MatchAnalyticsApplicationService {
       MatchStatisticRepository matchStatistics,
       MatchAnalyticsRepository analytics,
       MatchAnalyticsCalculator calculator,
+      ModelEvaluationApplicationService modelEvaluation,
       Clock clock) {
     this.matches = matches;
     this.matchStatistics = matchStatistics;
     this.analytics = analytics;
     this.calculator = calculator;
+    this.modelEvaluation = modelEvaluation;
     this.clock = clock;
   }
 
@@ -252,7 +255,9 @@ public class MatchAnalyticsApplicationService {
         MODEL_VERSION,
         snapshot.reason(),
         now);
-    return analytics.save(entity);
+    MatchAnalytics saved = analytics.save(entity);
+    modelEvaluation.recordPreMatchSnapshot(saved);
+    return saved;
   }
 
   private BigDecimal average(List<BigDecimal> values) {

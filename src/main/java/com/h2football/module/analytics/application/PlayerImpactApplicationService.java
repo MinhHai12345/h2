@@ -76,8 +76,7 @@ public class PlayerImpactApplicationService {
           .forEach(
               statistic ->
                   historyByPlayer
-                      .computeIfAbsent(
-                          statistic.getPlayer().getId(), ignored -> new ArrayList<>())
+                      .computeIfAbsent(statistic.getPlayer().getId(), ignored -> new ArrayList<>())
                       .add(statistic));
     }
 

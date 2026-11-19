@@ -30,8 +30,7 @@ public class PlayerImpactCalculator {
     BigDecimal tacklesPer90 = per90(sum(recent, MatchPlayerStatistic::getTackles), minutes);
     BigDecimal interceptionsPer90 =
         per90(sum(recent, MatchPlayerStatistic::getInterceptions), minutes);
-    BigDecimal clearancesPer90 =
-        per90(sum(recent, MatchPlayerStatistic::getClearances), minutes);
+    BigDecimal clearancesPer90 = per90(sum(recent, MatchPlayerStatistic::getClearances), minutes);
     BigDecimal expectedGoalsPer90 = per90Decimal(recent, minutes, true);
     BigDecimal expectedAssistsPer90 = per90Decimal(recent, minutes, false);
     BigDecimal rating = averageRating(recent);
@@ -63,7 +62,8 @@ public class PlayerImpactCalculator {
     BigDecimal ratingIndex =
         rating == null
             ? null
-            : rating.subtract(new BigDecimal("6"))
+            : rating
+                .subtract(new BigDecimal("6"))
                 .divide(new BigDecimal("2.5"), SCALE + 2, RoundingMode.HALF_UP)
                 .max(BigDecimal.ZERO)
                 .min(BigDecimal.ONE);
@@ -71,7 +71,14 @@ public class PlayerImpactCalculator {
     BigDecimal[] weights = weights(position);
     BigDecimal score =
         weighted(
-            attack, weights[0], creation, weights[1], defending, weights[2], ratingIndex, weights[3]);
+            attack,
+            weights[0],
+            creation,
+            weights[1],
+            defending,
+            weights[2],
+            ratingIndex,
+            weights[3]);
     return new PlayerImpact(
         score == null ? null : score.multiply(ONE_HUNDRED).setScale(SCALE, RoundingMode.HALF_UP),
         scale(attack),
@@ -155,7 +162,8 @@ public class PlayerImpactCalculator {
   private BigDecimal normalize(BigDecimal value, String ceiling) {
     return value == null
         ? null
-        : value.divide(new BigDecimal(ceiling), SCALE + 2, RoundingMode.HALF_UP)
+        : value
+            .divide(new BigDecimal(ceiling), SCALE + 2, RoundingMode.HALF_UP)
             .max(BigDecimal.ZERO)
             .min(BigDecimal.ONE);
   }
@@ -191,7 +199,9 @@ public class PlayerImpactCalculator {
                         ? item.getExpectedGoals() != null
                         : item.getExpectedAssists() != null);
     return available
-        ? total.multiply(NINETY).divide(BigDecimal.valueOf(minutes), SCALE + 2, RoundingMode.HALF_UP)
+        ? total
+            .multiply(NINETY)
+            .divide(BigDecimal.valueOf(minutes), SCALE + 2, RoundingMode.HALF_UP)
         : null;
   }
 

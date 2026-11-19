@@ -20,8 +20,7 @@ public class PlayerImpactController {
 
   @GetMapping
   public MatchPlayerImpactResponse calculate(
-      @PathVariable Long matchId,
-      @RequestParam(defaultValue = "SOFASCORE") Provider provider) {
+      @PathVariable Long matchId, @RequestParam(defaultValue = "SOFASCORE") Provider provider) {
     return playerImpact.calculate(matchId, provider);
   }
 }

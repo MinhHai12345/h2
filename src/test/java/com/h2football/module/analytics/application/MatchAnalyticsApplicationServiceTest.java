@@ -29,6 +29,7 @@ class MatchAnalyticsApplicationServiceTest {
   private MatchRepository matches;
   private MatchStatisticRepository matchStatistics;
   private MatchAnalyticsRepository analytics;
+  private ModelEvaluationApplicationService modelEvaluation;
   private MatchAnalyticsApplicationService service;
   private Team home;
   private Team away;
@@ -41,12 +42,14 @@ class MatchAnalyticsApplicationServiceTest {
     matches = mock(MatchRepository.class);
     matchStatistics = mock(MatchStatisticRepository.class);
     analytics = mock(MatchAnalyticsRepository.class);
+    modelEvaluation = mock(ModelEvaluationApplicationService.class);
     service =
         new MatchAnalyticsApplicationService(
             matches,
             matchStatistics,
             analytics,
             new MatchAnalyticsCalculator(),
+            modelEvaluation,
             Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC));
 
     home = team(10L, "Home FC");

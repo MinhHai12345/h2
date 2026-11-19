@@ -94,8 +94,12 @@ The application connects to the `h2_football` schema by default. Never point thi
 - `GET /api/v1/matches/{matchId}/player-impact?provider=SOFASCORE`
 - `GET /api/v1/seasons/{seasonId}/match-analytics?provider=SOFASCORE`
 - `GET /api/v1/seasons/{seasonId}/player-performance?provider=SOFASCORE`
+- `GET /api/v1/seasons/{seasonId}/model-evaluation?provider=SOFASCORE`
+- `POST /api/v1/seasons/{seasonId}/model-evaluation/rebuild?provider=SOFASCORE` (requires `X-Ingestion-Admin-Key`)
 
 Player Impact requires confirmed lineups for the target match. It uses only player match-statistic observations from finished matches in the same season before the target kickoff. Its 0–100 component-weighted index is descriptive; missing historical data remains null and is reported through team data coverage.
+
+Model Evaluation automatically captures immutable pre-match probability snapshots and evaluates them against completed results. Reports are separated by model version and include multiclass Brier Score, Log Loss and ten-bin confidence calibration. See [Model Evaluation](docs/architecture/model-evaluation.md).
 
 ## Delivery phases
 
