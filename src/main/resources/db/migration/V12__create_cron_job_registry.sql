@@ -5,6 +5,7 @@ CREATE TABLE cron_jobs (
     job_class VARCHAR(255) NOT NULL,
     cron_expression VARCHAR(120) NOT NULL,
     description VARCHAR(500) NULL,
+    job_data_json JSON NULL,
     status VARCHAR(20) NOT NULL,
     last_executed_at TIMESTAMP(6) NULL,
     last_execution_status VARCHAR(20) NULL,
