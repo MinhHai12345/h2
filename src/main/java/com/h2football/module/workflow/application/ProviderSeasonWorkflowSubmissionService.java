@@ -45,8 +45,7 @@ public class ProviderSeasonWorkflowSubmissionService {
     } catch (JsonProcessingException exception) {
       throw new IllegalStateException("Unable to serialize provider workflow request", exception);
     }
-    WorkflowRun run =
-        checkpoints.createOrLoad(WORKFLOW_TYPE, request.idempotencyKey(), payload);
+    WorkflowRun run = checkpoints.createOrLoad(WORKFLOW_TYPE, request.idempotencyKey(), payload);
     if (run.getStatus() != WorkflowRunStatus.SUCCEEDED) scheduler.schedule(run.getId());
     return checkpoints.getRun(run.getId());
   }

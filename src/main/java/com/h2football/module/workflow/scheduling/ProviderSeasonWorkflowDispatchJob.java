@@ -13,8 +13,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 
 @DisallowConcurrentExecution
 public class ProviderSeasonWorkflowDispatchJob extends QuartzJobBean {
-  private static final Logger log =
-      LoggerFactory.getLogger(ProviderSeasonWorkflowDispatchJob.class);
+  private static final Logger log = LoggerFactory.getLogger(ProviderSeasonWorkflowDispatchJob.class);
 
   private final ProviderSeasonWorkflowSubmissionService submissions;
 
@@ -34,11 +33,7 @@ public class ProviderSeasonWorkflowDispatchJob extends QuartzJobBean {
             ? context.getFireTime()
             : context.getScheduledFireTime();
     String idempotencyKey =
-        provider.name().toLowerCase()
-            + "-season-"
-            + seasonId
-            + "-"
-            + scheduledAt.getTime();
+        provider.name().toLowerCase() + "-season-" + seasonId + "-" + scheduledAt.getTime();
     try {
       var run =
           submissions.submit(

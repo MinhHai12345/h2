@@ -158,8 +158,7 @@ class ProviderSeasonPersistenceServiceTest {
         .thenReturn(Optional.empty());
     when(identities.findCanonicalId(ResourceType.MATCH, Provider.FOOTBALL_DATA, "match-3"))
         .thenReturn(Optional.empty());
-    when(matches.findAllBySeasonIdOrderByKickoffAtAsc(20L))
-        .thenReturn(List.of(existingMatch));
+    when(matches.findAllBySeasonIdOrderByKickoffAtAsc(20L)).thenReturn(List.of(existingMatch));
     when(existingMatch.getHomeTeam()).thenReturn(home);
     when(existingMatch.getAwayTeam()).thenReturn(away);
     when(existingMatch.getKickoffAt()).thenReturn(kickoff);
@@ -192,8 +191,7 @@ class ProviderSeasonPersistenceServiceTest {
     assertThat(result.created()).isZero();
     assertThat(result.linkedToExistingMatches()).isEqualTo(1);
     verify(identities).register(ResourceType.MATCH, Provider.FOOTBALL_DATA, "match-3", 300L);
-    verify(existingMatch)
-        .updateSnapshot(kickoff, MatchStatus.FINISHED, null, null, "1");
+    verify(existingMatch).updateSnapshot(kickoff, MatchStatus.FINISHED, null, null, "1");
     verify(matches, never()).save(any(Match.class));
   }
 }
