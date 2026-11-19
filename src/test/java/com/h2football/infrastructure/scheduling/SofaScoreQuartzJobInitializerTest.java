@@ -8,7 +8,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobProperties;
-import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
 import com.h2football.module.operations.application.CronJobApplicationService;
 import com.h2football.module.operations.domain.model.CronJob;
 import com.h2football.module.workflow.scheduling.SofaScoreSeasonWorkflowDispatchJob;
@@ -53,7 +52,7 @@ class SofaScoreQuartzJobInitializerTest {
             eq("sofascore-ingestion"),
             eq(SofaScoreSeasonWorkflowDispatchJob.class.getName()),
             eq("0 15 2 * * ?"),
-            eq("Synchronize SofaScore teams and match snapshots for configured season"),
+            eq("Run the complete SofaScore season ingestion and analytics workflow"),
             data.capture());
     org.junit.jupiter.api.Assertions.assertEquals(
         42L, data.getValue().getLongValue("canonicalSeasonId"));
