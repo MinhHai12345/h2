@@ -59,7 +59,7 @@ public class MasterDataImportApplicationService {
       Provider provider, String externalId, String code, String name, Long countryId) {
     String sourceId = normalize(externalId, "externalId");
     String normalizedCode = normalize(code, "code").toUpperCase();
-    String leagueName = normalize(name, "name");
+    String leagueName = ProviderDataStandardizer.leagueName(normalize(name, "name"));
 
     Long canonicalId =
         identities.findCanonicalId(ResourceType.LEAGUE, provider, sourceId).orElse(null);

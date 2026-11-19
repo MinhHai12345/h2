@@ -56,6 +56,52 @@ class PlayerApplicationServiceTest {
   }
 
   @Test
+  void linksUniqueExistingPlayerByNormalizedNameAndCountry() {
+    Player existing = mock(Player.class);
+    when(existing.getId()).thenReturn(88L);
+    when(existing.getName()).thenReturn("João Silva");
+    when(existing.getCountryCode()).thenReturn("BR");
+    when(identities.findCanonicalId(any(), eq(Provider.UNDERSTAT), eq("player-88")))
+        .thenReturn(Optional.empty());
+    when(players.findAll()).thenReturn(java.util.List.of(existing));
+
+    Long id =
+        service.upsertFromProvider(
+            Provider.UNDERSTAT,
+            "player-88",
+            new PlayerApplicationService.PlayerInput(
+                "Joao Silva", null, null, null, "br", "Brazil"));
+
+    assertThat(id).isEqualTo(88L);
+    verify(identities).register(any(), eq(Provider.UNDERSTAT), eq("player-88"), eq(88L));
+    verify(players, never()).save(any());
+  }
+
+  @Test
+  void rejectsAmbiguousPlayerIdentityInsteadOfCreatingDuplicate() {
+    Player first = mock(Player.class);
+    Player second = mock(Player.class);
+    when(first.getName()).thenReturn("Alex Smith");
+    when(second.getName()).thenReturn("Alex Smith");
+    when(first.getCountryCode()).thenReturn("GB");
+    when(second.getCountryCode()).thenReturn("GB");
+    when(identities.findCanonicalId(any(), eq(Provider.UNDERSTAT), eq("player-x")))
+        .thenReturn(Optional.empty());
+    when(players.findAll()).thenReturn(java.util.List.of(first, second));
+
+    org.assertj.core.api.Assertions.assertThatThrownBy(
+            () ->
+                service.upsertFromProvider(
+                    Provider.UNDERSTAT,
+                    "player-x",
+                    new PlayerApplicationService.PlayerInput(
+                        "Alex Smith", null, null, null, "GB", "England")))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Ambiguous canonical player identity");
+    verify(players, never()).save(any());
+  }
+
+  @Test
   void preservesOptionalProfileFieldsWhenProviderReturnsPartialPlayer() {
     Player player = new Player("Player One", "P. One", "player-one", "F", "BR", "Brazil");
 

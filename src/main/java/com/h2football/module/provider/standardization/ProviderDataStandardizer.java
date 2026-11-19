@@ -559,6 +559,25 @@ public final class ProviderDataStandardizer {
     return LEAGUE_ALIASES.getOrDefault(cleaned.toLowerCase(Locale.ROOT), cleaned);
   }
 
+  public static String leagueMatchKey(String sourceName) {
+    String canonicalName = leagueName(sourceName);
+    return comparisonKey(canonicalName);
+  }
+
+  public static String playerMatchKey(String sourceName) {
+    return comparisonKey(sourceName);
+  }
+
+  private static String comparisonKey(String value) {
+    if (value == null || value.isBlank()) return "";
+    return Normalizer.normalize(value, Normalizer.Form.NFD)
+        .replaceAll("\\p{M}+", "")
+        .toLowerCase(Locale.ROOT)
+        .replaceAll("[^a-z0-9]+", " ")
+        .trim()
+        .replaceAll("\\s+", " ");
+  }
+
   public static String statisticKey(String sourceKey, String sourceName) {
     String key = clean(sourceKey);
     String candidate = key == null ? clean(sourceName) : key;

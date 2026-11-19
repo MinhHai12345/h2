@@ -2,6 +2,7 @@ package com.h2football.shared.exception;
 
 import com.h2football.module.analytics.application.MatchAnalyticsNotFoundException;
 import com.h2football.module.masterdata.application.DuplicateMasterDataException;
+import com.h2football.module.identity.application.ExternalIdentityConflictException;
 import com.h2football.module.masterdata.application.MasterDataNotFoundException;
 import com.h2football.module.match.application.MatchNotFoundException;
 import com.h2football.module.operations.application.CronJobNotFoundException;
@@ -66,7 +67,7 @@ public class GlobalExceptionHandler {
     return build(HttpStatus.NOT_FOUND, "RESOURCE_NOT_FOUND", exception.getMessage(), request);
   }
 
-  @ExceptionHandler({DuplicateMasterDataException.class, DataIntegrityViolationException.class})
+  @ExceptionHandler({DuplicateMasterDataException.class, ExternalIdentityConflictException.class, DataIntegrityViolationException.class})
   public ResponseEntity<ApiErrorResponse> handleConflict(
       Exception exception, HttpServletRequest request) {
     return build(
