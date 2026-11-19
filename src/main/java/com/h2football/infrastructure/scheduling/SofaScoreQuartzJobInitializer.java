@@ -3,14 +3,14 @@ package com.h2football.infrastructure.scheduling;
 import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobProperties;
 import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
 import com.h2football.module.operations.application.CronJobApplicationService;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import org.quartz.JobDataMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
-import java.util.LinkedHashSet;
-import java.util.Set;
 
 /** Reconciles configured SofaScore jobs with the application job registry. */
 @Component
@@ -36,7 +36,8 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
     }
     if (properties.getSeasons().isEmpty()) {
       cronJobs.pauseGroup(JOB_GROUP);
-      log.warn("SofaScore scheduled ingestion has no configured seasons; existing jobs were paused");
+      log.warn(
+          "SofaScore scheduled ingestion has no configured seasons; existing jobs were paused");
       return;
     }
 
