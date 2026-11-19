@@ -32,6 +32,7 @@ public class SofaScoreSeasonMatchIngestionService {
     }
 
     var teams = masterData.syncTeams(tournamentId, sofaSeasonId);
+    ensureNotInterrupted();
     List<WindowSyncResult> windows = new ArrayList<>();
     Set<Long> eventIds = new LinkedHashSet<>();
 
@@ -44,6 +45,7 @@ public class SofaScoreSeasonMatchIngestionService {
       boolean exhausted = false;
 
       for (int page = 0; page < MAX_PAGES_PER_WINDOW; page++) {
+        ensureNotInterrupted();
         var result =
             matches.sync(tournamentId, sofaSeasonId, canonicalSeasonId, window, page);
         if (result.discoveredEvents() == 0) {
@@ -87,6 +89,12 @@ public class SofaScoreSeasonMatchIngestionService {
         eventIds.size(),
         List.copyOf(windows),
         List.copyOf(warnings));
+  }
+
+  private void ensureNotInterrupted() {
+    if (Thread.currentThread().isInterrupted()) {
+      throw new IllegalStateException("SofaScore season synchronization was interrupted");
+    }
   }
 
   public record WindowSyncResult(
