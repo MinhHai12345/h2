@@ -52,9 +52,9 @@ Candidate rules:
 
 - League imports use country plus the canonical league-name key; ambiguous candidates fail closed.
 - Team imports use country plus the shared team alias key; ambiguous candidates fail closed.
-- Player ingestion links an existing player only when normalized name and country code yield
-  exactly one candidate. Ambiguous candidates fail closed; missing country codes do not trigger
-  name-only auto-linking.
+- Player ingestion links only through an existing provider external identity. Names and country
+  codes are not sufficient proof of identity; unmatched provider players are created separately
+  and surfaced as reconciliation candidates for explicit review.
 - Season dates are required by the canonical Season model. Provider season IDs can be mapped
   to an already-created canonical season through the explicit mapping API; discovery metadata
   without dates is not used to fabricate a Season.

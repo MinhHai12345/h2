@@ -5,8 +5,6 @@ import com.h2football.module.identity.domain.model.Provider;
 import com.h2football.module.identity.domain.model.ResourceType;
 import com.h2football.module.player.domain.model.Player;
 import com.h2football.module.player.domain.repository.PlayerRepository;
-import com.h2football.module.provider.standardization.ProviderDataStandardizer;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,39 +40,15 @@ public class PlayerApplicationService {
           input.countryName());
       return existing.getId();
     }
-    String playerKey = ProviderDataStandardizer.playerMatchKey(input.name());
-    String countryCode = normalizeCountryCode(input.countryCode());
-    List<Player> candidates =
-        players.findAll().stream()
-            .filter(player -> ProviderDataStandardizer.playerMatchKey(player.getName()).equals(playerKey))
-            .filter(player -> countryCode != null)
-            .filter(player -> countryCode.equals(normalizeCountryCode(player.getCountryCode())))
-            .toList();
-    if (candidates.size() > 1) {
-      throw new IllegalStateException(
-          "Ambiguous canonical player identity for provider " + provider + ": " + input.name());
-    }
-    Player canonical;
-    if (candidates.size() == 1) {
-      canonical = candidates.get(0);
-      canonical.updateProfile(
-          input.name(),
-          input.shortName(),
-          input.slug(),
-          input.position(),
-          input.countryCode(),
-          input.countryName());
-    } else {
-      canonical =
-          players.save(
-              new Player(
-                  input.name(),
-                  input.shortName(),
-                  input.slug(),
-                  input.position(),
-                  input.countryCode(),
-                  input.countryName()));
-    }
+    Player canonical =
+        players.save(
+            new Player(
+                input.name(),
+                input.shortName(),
+                input.slug(),
+                input.position(),
+                input.countryCode(),
+                input.countryName()));
     identities.register(ResourceType.PLAYER, provider, externalId, canonical.getId());
     return canonical.getId();
   }

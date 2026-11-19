@@ -56,49 +56,27 @@ class PlayerApplicationServiceTest {
   }
 
   @Test
-  void linksUniqueExistingPlayerByNormalizedNameAndCountry() {
+  void doesNotAutoLinkPlayerByNameAndCountryWithoutProviderIdentity() {
     Player existing = mock(Player.class);
-    when(existing.getId()).thenReturn(88L);
-    when(existing.getName()).thenReturn("João Silva");
-    when(existing.getCountryCode()).thenReturn("BR");
-    when(identities.findCanonicalId(any(), eq(Provider.UNDERSTAT), eq("player-88")))
+    Player saved = mock(Player.class);
+    when(existing.getName()).thenReturn("Alex Smith");
+    when(existing.getCountryCode()).thenReturn("GB");
+    when(saved.getId()).thenReturn(89L);
+    when(identities.findCanonicalId(any(), eq(Provider.UNDERSTAT), eq("player-new")))
         .thenReturn(Optional.empty());
     when(players.findAll()).thenReturn(java.util.List.of(existing));
+    when(players.save(any(Player.class))).thenReturn(saved);
 
     Long id =
         service.upsertFromProvider(
             Provider.UNDERSTAT,
-            "player-88",
+            "player-new",
             new PlayerApplicationService.PlayerInput(
-                "Joao Silva", null, null, null, "br", "Brazil"));
+                "Alex Smith", null, null, null, "GB", "England"));
 
-    assertThat(id).isEqualTo(88L);
-    verify(identities).register(any(), eq(Provider.UNDERSTAT), eq("player-88"), eq(88L));
-    verify(players, never()).save(any());
-  }
-
-  @Test
-  void rejectsAmbiguousPlayerIdentityInsteadOfCreatingDuplicate() {
-    Player first = mock(Player.class);
-    Player second = mock(Player.class);
-    when(first.getName()).thenReturn("Alex Smith");
-    when(second.getName()).thenReturn("Alex Smith");
-    when(first.getCountryCode()).thenReturn("GB");
-    when(second.getCountryCode()).thenReturn("GB");
-    when(identities.findCanonicalId(any(), eq(Provider.UNDERSTAT), eq("player-x")))
-        .thenReturn(Optional.empty());
-    when(players.findAll()).thenReturn(java.util.List.of(first, second));
-
-    org.assertj.core.api.Assertions.assertThatThrownBy(
-            () ->
-                service.upsertFromProvider(
-                    Provider.UNDERSTAT,
-                    "player-x",
-                    new PlayerApplicationService.PlayerInput(
-                        "Alex Smith", null, null, null, "GB", "England")))
-        .isInstanceOf(IllegalStateException.class)
-        .hasMessageContaining("Ambiguous canonical player identity");
-    verify(players, never()).save(any());
+    assertThat(id).isEqualTo(89L);
+    verify(players).save(any(Player.class));
+    verify(identities).register(any(), eq(Provider.UNDERSTAT), eq("player-new"), eq(89L));
   }
 
   @Test
