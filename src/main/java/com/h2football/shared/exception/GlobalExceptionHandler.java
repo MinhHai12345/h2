@@ -2,6 +2,8 @@ package com.h2football.shared.exception;
 
 import com.h2football.module.analytics.application.MatchAnalyticsNotFoundException;
 import com.h2football.module.masterdata.application.DuplicateMasterDataException;
+import com.h2football.module.operations.application.CronJobNotFoundException;
+import com.h2football.module.operations.application.CronJobOperationException;
 import com.h2football.module.masterdata.application.MasterDataNotFoundException;
 import com.h2football.module.match.application.MatchNotFoundException;
 import com.h2football.shared.response.ApiErrorResponse;
@@ -56,7 +58,8 @@ public class GlobalExceptionHandler {
   @ExceptionHandler({
     MasterDataNotFoundException.class,
     MatchNotFoundException.class,
-    MatchAnalyticsNotFoundException.class
+    MatchAnalyticsNotFoundException.class,
+    CronJobNotFoundException.class
   })
   public ResponseEntity<ApiErrorResponse> handleNotFound(
       RuntimeException exception, HttpServletRequest request) {
@@ -71,6 +74,12 @@ public class GlobalExceptionHandler {
         "RESOURCE_CONFLICT",
         "The resource conflicts with existing data",
         request);
+  }
+
+  @ExceptionHandler(CronJobOperationException.class)
+  public ResponseEntity<ApiErrorResponse> handleCronJobOperation(
+      CronJobOperationException exception, HttpServletRequest request) {
+    return build(HttpStatus.CONFLICT, "CRON_JOB_OPERATION_FAILED", exception.getMessage(), request);
   }
 
   @ExceptionHandler(IllegalArgumentException.class)
