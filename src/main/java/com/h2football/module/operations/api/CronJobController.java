@@ -1,8 +1,8 @@
 package com.h2football.module.operations.api;
 
-import com.h2football.module.operations.application.CronJobApplicationService;
 import com.h2football.module.operations.api.CronJobDtos.CronJobResponse;
 import com.h2football.module.operations.api.CronJobDtos.TriggerRequest;
+import com.h2football.module.operations.application.CronJobApplicationService;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.util.Map;
@@ -99,7 +99,8 @@ public class CronJobController {
     if (request != null) {
       if (request.tournamentId() != null) parameters.put("tournamentId", request.tournamentId());
       if (request.sofaSeasonId() != null) parameters.put("sofaSeasonId", request.sofaSeasonId());
-      if (request.canonicalSeasonId() != null) parameters.put("canonicalSeasonId", request.canonicalSeasonId());
+      if (request.canonicalSeasonId() != null)
+        parameters.put("canonicalSeasonId", request.canonicalSeasonId());
     }
     return ResponseEntity.ok(CronJobResponse.from(cronJobs.triggerNow(id, parameters)));
   }
@@ -111,7 +112,8 @@ public class CronJobController {
       @RequestBody ScheduleRequest request) {
     ResponseEntity<?> denied = authorize(apiKey);
     return denied == null
-        ? ResponseEntity.ok(CronJobResponse.from(cronJobs.updateSchedule(id, request.cronExpression())))
+        ? ResponseEntity.ok(
+            CronJobResponse.from(cronJobs.updateSchedule(id, request.cronExpression())))
         : denied;
   }
 
@@ -128,7 +130,10 @@ public class CronJobController {
   private ResponseEntity<?> authorize(String suppliedApiKey) {
     if (configuredApiKey == null || configuredApiKey.isBlank()) {
       return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE)
-          .body(Map.of("message", "Cron job management is disabled: configure INGESTION_ADMIN_API_KEY."));
+          .body(
+              Map.of(
+                  "message",
+                  "Cron job management is disabled: configure INGESTION_ADMIN_API_KEY."));
     }
     boolean valid =
         suppliedApiKey != null
