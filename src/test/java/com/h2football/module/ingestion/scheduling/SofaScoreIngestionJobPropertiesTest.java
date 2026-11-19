@@ -19,7 +19,6 @@ class SofaScoreIngestionJobPropertiesTest {
     assertThat(properties.getLeagueCatalogue().isRunOnStartup()).isFalse();
   }
 
-
   @Test
   void shouldProvideBoundedRetryDefaultsForMatchDetailStreams() {
     SofaScoreIngestionJobProperties properties = new SofaScoreIngestionJobProperties();
