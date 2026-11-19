@@ -28,9 +28,7 @@ public class WorkflowController {
   private final ObjectMapper objectMapper;
 
   public WorkflowController(
-      WorkflowCoordinator coordinator,
-      WorkflowRunQueryService queries,
-      ObjectMapper objectMapper) {
+      WorkflowCoordinator coordinator, WorkflowRunQueryService queries, ObjectMapper objectMapper) {
     this.coordinator = coordinator;
     this.queries = queries;
     this.objectMapper = objectMapper;

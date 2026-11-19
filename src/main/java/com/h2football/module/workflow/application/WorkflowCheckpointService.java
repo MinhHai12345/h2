@@ -111,7 +111,8 @@ public class WorkflowCheckpointService {
   }
 
   private WorkflowStageExecution findStage(Long runId, String stageKey) {
-    return stages.findByWorkflowRun_IdAndStageKey(runId, stageKey)
+    return stages
+        .findByWorkflowRun_IdAndStageKey(runId, stageKey)
         .orElseThrow(() -> new IllegalArgumentException("Workflow stage not found: " + stageKey));
   }
 

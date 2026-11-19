@@ -63,10 +63,7 @@ public class WorkflowStageExecution {
   protected WorkflowStageExecution() {}
 
   public WorkflowStageExecution(WorkflowRun workflowRun, String stageKey, int stageOrder) {
-    if (workflowRun == null
-        || stageKey == null
-        || stageKey.isBlank()
-        || stageOrder < 0) {
+    if (workflowRun == null || stageKey == null || stageKey.isBlank() || stageOrder < 0) {
       throw new IllegalArgumentException(
           "Workflow run, stage key and non-negative order are required");
     }
