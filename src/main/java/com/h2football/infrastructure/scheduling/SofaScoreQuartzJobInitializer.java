@@ -3,7 +3,9 @@ package com.h2football.infrastructure.scheduling;
 import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobProperties;
 import com.h2football.module.ingestion.scheduling.SofaScoreLeagueCatalogueSyncJob;
 import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
-import com.h2football.module.operations.application.CronJobApplicationService;\nimport com.h2football.module.operations.domain.model.CronJob;\nimport com.h2football.module.operations.domain.model.CronJobStatus;
+import com.h2football.module.operations.application.CronJobApplicationService;
+import com.h2football.module.operations.domain.model.CronJob;
+import com.h2football.module.operations.domain.model.CronJobStatus;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
@@ -105,7 +107,11 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
     cronJobs.deleteGroupExcept(SEASON_GROUP, activeJobNames);
   }
 
-  private CronJob resumeIfPaused(CronJob job) {\n    return job.getStatus() == CronJobStatus.PAUSED ? cronJobs.resume(job.getId()) : job;\n  }\n\n  private void validate(SofaScoreIngestionJobProperties.Season season) {
+  private CronJob resumeIfPaused(CronJob job) {
+    return job.getStatus() == CronJobStatus.PAUSED ? cronJobs.resume(job.getId()) : job;
+  }
+
+  private void validate(SofaScoreIngestionJobProperties.Season season) {
     if (season.getTournamentId() <= 0
         || season.getSofaSeasonId() <= 0
         || season.getCanonicalSeasonId() <= 0) {
