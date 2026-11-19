@@ -129,7 +129,6 @@ public class CronJobApplicationService {
     }
   }
 
-  @Transactional
   public CronJob triggerNow(Long id, Map<String, Long> parameters) {
     CronJob job = get(id);
     if (job.getStatus() == CronJobStatus.PAUSED) {
@@ -170,8 +169,7 @@ public class CronJobApplicationService {
       if (!interrupted) {
         throw new CronJobOperationException("Cron job " + id + " has no interruptible execution");
       }
-      job.markScheduled();
-      return repository.save(job);
+      return job;
     } catch (SchedulerException exception) {
       throw new CronJobOperationException("Unable to stop cron job " + id, exception);
     }
