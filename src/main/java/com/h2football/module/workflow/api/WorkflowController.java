@@ -6,6 +6,8 @@ import com.h2football.module.workflow.application.SofaScoreSeasonWorkflowRequest
 import com.h2football.module.workflow.application.WorkflowCoordinator;
 import com.h2football.module.workflow.application.WorkflowRunQueryService;
 import com.h2football.module.workflow.bootstrap.WorkflowConfiguration;
+import com.h2football.module.workflow.domain.model.WorkflowRun;
+import com.h2football.module.workflow.domain.model.WorkflowStageExecution;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
@@ -26,7 +28,9 @@ public class WorkflowController {
   private final ObjectMapper objectMapper;
 
   public WorkflowController(
-      WorkflowCoordinator coordinator, WorkflowRunQueryService queries, ObjectMapper objectMapper) {
+      WorkflowCoordinator coordinator,
+      WorkflowRunQueryService queries,
+      ObjectMapper objectMapper) {
     this.coordinator = coordinator;
     this.queries = queries;
     this.objectMapper = objectMapper;
@@ -37,7 +41,10 @@ public class WorkflowController {
       throws JsonProcessingException {
     SofaScoreSeasonWorkflowRequest payload =
         new SofaScoreSeasonWorkflowRequest(
-            request.idempotencyKey(), request.tournamentId(), request.sofaSeasonId(), request.canonicalSeasonId());
+            request.idempotencyKey(),
+            request.tournamentId(),
+            request.sofaSeasonId(),
+            request.canonicalSeasonId());
     var run =
         coordinator.start(
             WorkflowConfiguration.SOFASCORE_SEASON_SYNC,
@@ -75,9 +82,7 @@ public class WorkflowController {
       Instant startedAt,
       Instant completedAt,
       List<WorkflowStageResponse> stages) {
-    static WorkflowRunResponse from(
-        com.h2football.module.workflow.domain.model.WorkflowRun run,
-        List<com.h2football.module.workflow.domain.model.WorkflowStageExecution> stages) {
+    static WorkflowRunResponse from(WorkflowRun run, List<WorkflowStageExecution> stages) {
       return new WorkflowRunResponse(
           run.getId(),
           run.getWorkflowType(),

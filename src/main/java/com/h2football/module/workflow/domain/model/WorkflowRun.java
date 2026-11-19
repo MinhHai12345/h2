@@ -12,7 +12,6 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
 @Table(
@@ -72,10 +71,14 @@ public class WorkflowRun {
 
   public WorkflowRun(
       String workflowType, String idempotencyKey, String requestPayload, Instant createdAt) {
-    if (workflowType == null || workflowType.isBlank()
-        || idempotencyKey == null || idempotencyKey.isBlank()
-        || requestPayload == null || createdAt == null) {
-      throw new IllegalArgumentException("Workflow type, idempotency key, payload and createdAt are required");
+    if (workflowType == null
+        || workflowType.isBlank()
+        || idempotencyKey == null
+        || idempotencyKey.isBlank()
+        || requestPayload == null
+        || createdAt == null) {
+      throw new IllegalArgumentException(
+          "Workflow type, idempotency key, payload and createdAt are required");
     }
     if (workflowType.length() > 80 || idempotencyKey.length() > 160) {
       throw new IllegalArgumentException("Workflow type or idempotency key exceeds its maximum length");
@@ -94,8 +97,10 @@ public class WorkflowRun {
     if (status == WorkflowRunStatus.SUCCEEDED) {
       throw new IllegalStateException("A completed workflow cannot be claimed");
     }
-    if (leaseOwner != null && leaseExpiresAt != null
-        && leaseExpiresAt.isAfter(now) && !leaseOwner.equals(owner)) {
+    if (leaseOwner != null
+        && leaseExpiresAt != null
+        && leaseExpiresAt.isAfter(now)
+        && !leaseOwner.equals(owner)) {
       throw new IllegalStateException("Workflow is already leased by another worker");
     }
     status = WorkflowRunStatus.RUNNING;
@@ -121,22 +126,63 @@ public class WorkflowRun {
 
   public void fail(String message) {
     status = WorkflowRunStatus.FAILED;
-    lastError = message == null ? "Workflow execution failed" : message.substring(0, Math.min(2000, message.length()));
+    lastError =
+        message == null
+            ? "Workflow execution failed"
+            : message.substring(0, Math.min(2000, message.length()));
     leaseOwner = null;
     leaseExpiresAt = null;
   }
 
-  public Long getId() { return id; }
-  public String getWorkflowType() { return workflowType; }
-  public String getIdempotencyKey() { return idempotencyKey; }
-  public String getRequestPayload() { return requestPayload; }
-  public WorkflowRunStatus getStatus() { return status; }
-  public String getCurrentStage() { return currentStage; }
-  public String getLeaseOwner() { return leaseOwner; }
-  public Instant getLeaseExpiresAt() { return leaseExpiresAt; }
-  public Instant getStartedAt() { return startedAt; }
-  public Instant getCompletedAt() { return completedAt; }
-  public String getLastError() { return lastError; }
-  public Instant getCreatedAt() { return createdAt; }
-  public long getVersion() { return version; }
+  public Long getId() {
+    return id;
+  }
+
+  public String getWorkflowType() {
+    return workflowType;
+  }
+
+  public String getIdempotencyKey() {
+    return idempotencyKey;
+  }
+
+  public String getRequestPayload() {
+    return requestPayload;
+  }
+
+  public WorkflowRunStatus getStatus() {
+    return status;
+  }
+
+  public String getCurrentStage() {
+    return currentStage;
+  }
+
+  public String getLeaseOwner() {
+    return leaseOwner;
+  }
+
+  public Instant getLeaseExpiresAt() {
+    return leaseExpiresAt;
+  }
+
+  public Instant getStartedAt() {
+    return startedAt;
+  }
+
+  public Instant getCompletedAt() {
+    return completedAt;
+  }
+
+  public String getLastError() {
+    return lastError;
+  }
+
+  public Instant getCreatedAt() {
+    return createdAt;
+  }
+
+  public long getVersion() {
+    return version;
+  }
 }

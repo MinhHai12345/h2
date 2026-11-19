@@ -17,7 +17,8 @@ class WorkflowDefinitionTest {
                 new WorkflowStageDefinition("INGESTION", handler),
                 new WorkflowStageDefinition("ANALYTICS", handler)));
 
-    assertEquals(List.of("INGESTION", "ANALYTICS"),
+    assertEquals(
+        List.of("INGESTION", "ANALYTICS"),
         definition.stages().stream().map(WorkflowStageDefinition::key).toList());
   }
 

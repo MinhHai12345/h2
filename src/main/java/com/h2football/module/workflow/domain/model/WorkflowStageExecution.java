@@ -63,8 +63,12 @@ public class WorkflowStageExecution {
   protected WorkflowStageExecution() {}
 
   public WorkflowStageExecution(WorkflowRun workflowRun, String stageKey, int stageOrder) {
-    if (workflowRun == null || stageKey == null || stageKey.isBlank() || stageOrder < 0) {
-      throw new IllegalArgumentException("Workflow run, stage key and non-negative order are required");
+    if (workflowRun == null
+        || stageKey == null
+        || stageKey.isBlank()
+        || stageOrder < 0) {
+      throw new IllegalArgumentException(
+          "Workflow run, stage key and non-negative order are required");
     }
     this.workflowRun = workflowRun;
     this.stageKey = stageKey;
@@ -89,18 +93,53 @@ public class WorkflowStageExecution {
 
   public void fail(String message) {
     status = WorkflowStageStatus.FAILED;
-    lastError = message == null ? "Stage execution failed" : message.substring(0, Math.min(2000, message.length()));
+    lastError =
+        message == null
+            ? "Stage execution failed"
+            : message.substring(0, Math.min(2000, message.length()));
   }
 
-  public Long getId() { return id; }
-  public WorkflowRun getWorkflowRun() { return workflowRun; }
-  public String getStageKey() { return stageKey; }
-  public int getStageOrder() { return stageOrder; }
-  public WorkflowStageStatus getStatus() { return status; }
-  public int getAttemptCount() { return attemptCount; }
-  public String getCheckpointPayload() { return checkpointPayload; }
-  public String getLastError() { return lastError; }
-  public Instant getStartedAt() { return startedAt; }
-  public Instant getCompletedAt() { return completedAt; }
-  public long getVersion() { return version; }
+  public Long getId() {
+    return id;
+  }
+
+  public WorkflowRun getWorkflowRun() {
+    return workflowRun;
+  }
+
+  public String getStageKey() {
+    return stageKey;
+  }
+
+  public int getStageOrder() {
+    return stageOrder;
+  }
+
+  public WorkflowStageStatus getStatus() {
+    return status;
+  }
+
+  public int getAttemptCount() {
+    return attemptCount;
+  }
+
+  public String getCheckpointPayload() {
+    return checkpointPayload;
+  }
+
+  public String getLastError() {
+    return lastError;
+  }
+
+  public Instant getStartedAt() {
+    return startedAt;
+  }
+
+  public Instant getCompletedAt() {
+    return completedAt;
+  }
+
+  public long getVersion() {
+    return version;
+  }
 }

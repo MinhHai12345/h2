@@ -9,7 +9,8 @@ public record WorkflowDefinition(String key, List<WorkflowStageDefinition> stage
       throw new IllegalArgumentException("Workflow key and at least one stage are required");
     }
     stages = List.copyOf(stages);
-    if (new HashSet<>(stages.stream().map(WorkflowStageDefinition::key).toList()).size() != stages.size()) {
+    if (new HashSet<>(stages.stream().map(WorkflowStageDefinition::key).toList()).size()
+        != stages.size()) {
       throw new IllegalArgumentException("Workflow stage keys must be unique");
     }
   }
