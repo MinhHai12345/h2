@@ -31,6 +31,46 @@ class MatchAnalyticsCalculatorTest {
   }
 
   @Test
+  void adjustsExpectedGoalsUsingBoundedLineupImpactAndCoverage() {
+    BigDecimal boosted =
+        calculator.adjustExpectedGoalsByPlayerImpact(
+            new BigDecimal("1.500000"), BigDecimal.ONE, BigDecimal.ZERO, new BigDecimal("100"));
+    BigDecimal reduced =
+        calculator.adjustExpectedGoalsByPlayerImpact(
+            new BigDecimal("1.500000"), BigDecimal.ZERO, BigDecimal.ONE, new BigDecimal("100"));
+    BigDecimal partial =
+        calculator.adjustExpectedGoalsByPlayerImpact(
+            new BigDecimal("1.500000"), BigDecimal.ONE, BigDecimal.ZERO, new BigDecimal("40"));
+
+    assertThat(boosted).isEqualByComparingTo("1.575000");
+    assertThat(reduced).isEqualByComparingTo("1.425000");
+    assertThat(partial).isEqualByComparingTo("1.530000");
+  }
+
+  @Test
+  void leavesExpectedGoalsUnchangedWhenPlayerImpactIsMissing() {
+    BigDecimal result =
+        calculator.adjustExpectedGoalsByPlayerImpact(
+            new BigDecimal("1.500000"), null, BigDecimal.ZERO, BigDecimal.ZERO);
+
+    assertThat(result).isEqualByComparingTo("1.500000");
+  }
+
+  @Test
+  void rejectsOutOfRangePlayerImpactIndicesAndCoverage() {
+    assertThatThrownBy(
+            () ->
+                calculator.adjustExpectedGoalsByPlayerImpact(
+                    BigDecimal.ONE, new BigDecimal("1.1"), BigDecimal.ZERO, BigDecimal.valueOf(100)))
+        .isInstanceOf(IllegalArgumentException.class);
+    assertThatThrownBy(
+            () ->
+                calculator.adjustExpectedGoalsByPlayerImpact(
+                    BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ZERO, new BigDecimal("101")))
+        .isInstanceOf(IllegalArgumentException.class);
+  }
+
+  @Test
   void calculatesAttractivenessFromGoalIntensityAndCompetitiveBalance() {
     BigDecimal result =
         calculator.calculateMatchAttractivenessIndex(

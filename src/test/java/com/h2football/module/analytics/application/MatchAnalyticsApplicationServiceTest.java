@@ -5,6 +5,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.h2football.module.analytics.application.PlayerImpactApplicationService.MatchPlayerImpactResponse;
+import com.h2football.module.analytics.application.PlayerImpactApplicationService.TeamImpact;
 import com.h2football.module.analytics.domain.model.MatchAnalytics;
 import com.h2football.module.analytics.domain.model.MatchAnalyticsStatus;
 import com.h2football.module.analytics.domain.repository.MatchAnalyticsRepository;
@@ -29,6 +31,7 @@ class MatchAnalyticsApplicationServiceTest {
   private MatchRepository matches;
   private MatchStatisticRepository matchStatistics;
   private MatchAnalyticsRepository analytics;
+  private PlayerImpactApplicationService playerImpact;
   private ModelEvaluationApplicationService modelEvaluation;
   private MatchAnalyticsApplicationService service;
   private Team home;
@@ -42,6 +45,7 @@ class MatchAnalyticsApplicationServiceTest {
     matches = mock(MatchRepository.class);
     matchStatistics = mock(MatchStatisticRepository.class);
     analytics = mock(MatchAnalyticsRepository.class);
+    playerImpact = mock(PlayerImpactApplicationService.class);
     modelEvaluation = mock(ModelEvaluationApplicationService.class);
     service =
         new MatchAnalyticsApplicationService(
@@ -49,6 +53,7 @@ class MatchAnalyticsApplicationServiceTest {
             matchStatistics,
             analytics,
             new MatchAnalyticsCalculator(),
+            playerImpact,
             modelEvaluation,
             Clock.fixed(Instant.parse("2026-01-01T00:00:00Z"), ZoneOffset.UTC));
 
@@ -75,6 +80,15 @@ class MatchAnalyticsApplicationServiceTest {
             .findAllByMatchIdInAndProviderOrderByMatchIdAscPeriodAscGroupNameAscStatisticKeyAsc(
                 List.of(1L, 2L), Provider.SOFASCORE))
         .thenReturn(historicalStatistics);
+    when(playerImpact.calculate(100L, Provider.SOFASCORE))
+        .thenReturn(
+            impact(
+                new BigDecimal("0.70"),
+                new BigDecimal("0.20"),
+                new BigDecimal("100"),
+                new BigDecimal("0.30"),
+                new BigDecimal("0.60"),
+                new BigDecimal("100")));
 
     MatchAnalytics result = service.rebuild(100L, Provider.SOFASCORE);
 
@@ -91,7 +105,23 @@ class MatchAnalyticsApplicationServiceTest {
         .isBetween(BigDecimal.ZERO, new BigDecimal("100"));
     assertThat(result.getHomeHistoryMatches()).isEqualTo(2);
     assertThat(result.getAwayHistoryMatches()).isEqualTo(2);
-    assertThat(result.getModelVersion()).isEqualTo("poisson-ema-v1");
+    assertThat(result.getModelVersion()).isEqualTo("poisson-ema-player-impact-v2");
+  }
+
+  @Test
+  void keepsBaselineWhenConfirmedLineupImpactIsUnavailable() {
+    List<MatchStatistic> historicalStatistics =
+        List.of(statistic(firstHistory, "1.6", "0.7"), statistic(secondHistory, "0.8", "1.4"));
+    when(matchStatistics
+            .findAllByMatchIdInAndProviderOrderByMatchIdAscPeriodAscGroupNameAscStatisticKeyAsc(
+                List.of(1L, 2L), Provider.SOFASCORE))
+        .thenReturn(historicalStatistics);
+    when(playerImpact.calculate(100L, Provider.SOFASCORE)).thenReturn(null);
+
+    MatchAnalytics result = service.rebuild(100L, Provider.SOFASCORE);
+
+    assertThat(result.getStatus()).isEqualTo(MatchAnalyticsStatus.READY);
+    assertThat(result.getModelVersion()).isEqualTo("poisson-ema-player-impact-v2");
   }
 
   @Test
@@ -108,6 +138,38 @@ class MatchAnalyticsApplicationServiceTest {
     assertThat(result.getHomeWinProbability()).isNull();
     assertThat(result.getMatchAttractivenessIndex()).isNull();
     assertThat(result.getInsufficientDataReason()).contains("expectedGoals");
+  }
+
+  private MatchPlayerImpactResponse impact(
+      BigDecimal homeAttack,
+      BigDecimal homeDefense,
+      BigDecimal homeCoverage,
+      BigDecimal awayAttack,
+      BigDecimal awayDefense,
+      BigDecimal awayCoverage) {
+    return new MatchPlayerImpactResponse(
+        100L,
+        Provider.SOFASCORE,
+        Instant.parse("2025-12-20T18:00:00Z"),
+        teamImpact(10L, "Home FC", homeAttack, homeDefense, homeCoverage),
+        teamImpact(20L, "Away FC", awayAttack, awayDefense, awayCoverage),
+        "player-impact-v1");
+  }
+
+  private TeamImpact teamImpact(
+      Long teamId, String teamName, BigDecimal attack, BigDecimal defense, BigDecimal coverage) {
+    return new TeamImpact(
+        teamId,
+        teamName,
+        true,
+        "4-3-3",
+        11,
+        11,
+        new BigDecimal("70.000"),
+        attack,
+        defense,
+        coverage,
+        List.of());
   }
 
   private Team team(Long id, String name) {
