@@ -211,17 +211,9 @@ public class CronJobApplicationService {
 
   private void ensureScheduled(CronJob job) throws SchedulerException {
     JobKey key = key(job);
-    if (scheduler.checkExists(key)) {
-      return;
+    if (!scheduler.checkExists(key)) {
+      schedule(job, deserializeJobData(job.getJobDataJson()));
     }
-    JobDataMap jobData = deserializeJobData(job.getJobDataJson());
-    scheduler.addJob(
-        JobBuilder.newJob(resolveJobClass(job.getJobClass()))
-            .withIdentity(key)
-            .usingJobData(jobData)
-            .storeDurably()
-            .build(),
-        true);
   }
 
   private Trigger buildTrigger(CronJob job, String expression) {
