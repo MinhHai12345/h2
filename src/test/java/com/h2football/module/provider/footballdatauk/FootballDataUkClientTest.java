@@ -23,8 +23,7 @@ class FootballDataUkClientTest {
     byte[] content =
         "Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea"
             .getBytes(Charset.forName("windows-1252"));
-    when(
-            http.getBytes(
+    when(http.getBytes(
                 properties.getFootballDataUk().getBaseUrl(),
                 "/mmz4281/{season}/{league}.csv",
                 Map.of(
