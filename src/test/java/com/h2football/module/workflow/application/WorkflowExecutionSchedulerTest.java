@@ -56,7 +56,9 @@ class WorkflowExecutionSchedulerTest {
   void shouldNotAddAnotherTriggerWhenAnExistingTriggerIsPending() throws Exception {
     when(scheduler.checkExists(any(JobKey.class))).thenReturn(true);
     when(scheduler.getCurrentlyExecutingJobs()).thenReturn(List.of());
-    when(scheduler.getTriggersOfJob(any(JobKey.class))).thenReturn(List.of(mock(Trigger.class)));
+    org.mockito.Mockito.doReturn(List.of(mock(Trigger.class)))
+        .when(scheduler)
+        .getTriggersOfJob(any(JobKey.class));
     WorkflowExecutionScheduler executionScheduler = new WorkflowExecutionScheduler(scheduler);
 
     executionScheduler.schedule(123L);
