@@ -110,3 +110,37 @@ Only positive numeric values for those three supported parameters are accepted. 
 - Stop interrupts the job thread; season traversal checks interruption between event pages. An in-flight provider/browser request may take time to return before interruption is observed.
 - Only registered job classes are accepted. The API does not accept arbitrary Java class names.
 - Other provider jobs should be added only when their ingestion application use case and required parameters are implemented.
+
+
+## Match detail orchestration
+
+After teams and season match pages have been synchronized, the season ingestion use case processes each unique, successfully mapped event in this order:
+
+1. Match statistics
+2. Lineups
+3. Incidents
+4. Player match statistics
+
+Player match statistics are sourced from the lineup response, so that step runs only after lineup ingestion succeeds. Statistics and incidents are independent of lineup ingestion and continue even if another stream fails.
+
+Each stream has its own bounded retry loop. A failed stream is retried without restarting successful streams for the same event. Other independent streams and other events continue to process. If any stream remains unsuccessful after its configured attempts, the season Quartz execution is marked as failed; the next scheduled/manual execution safely replays the idempotent ingestion operations.
+
+Configuration:
+
+```yaml
+app:
+  ingestion:
+    sofascore:
+      job:
+        match-details:
+          enabled: true
+          retry-attempts: 3
+          retry-delay-millis: 1000
+```
+
+Environment variables:
+- `SOFASCORE_MATCH_DETAILS_ENABLED`: enable match detail orchestration after season match synchronization.
+- `SOFASCORE_MATCH_DETAILS_RETRY_ATTEMPTS`: maximum attempts per stream and event (minimum effective value is 1).
+- `SOFASCORE_MATCH_DETAILS_RETRY_DELAY_MILLIS`: base delay between attempts; each subsequent retry waits a multiple of this value.
+
+When match details are disabled, the season job still imports teams and matches but does not call the four detail ingestion services.
