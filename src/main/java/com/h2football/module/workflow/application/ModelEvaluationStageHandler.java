@@ -32,7 +32,11 @@ public class ModelEvaluationStageHandler implements WorkflowStageHandler {
             .sum();
     return objectMapper.writeValueAsString(
         new ModelEvaluationCheckpoint(
-            request.canonicalSeasonId(), Provider.SOFASCORE, reports.size(), predictions, evaluated));
+            request.canonicalSeasonId(),
+            Provider.SOFASCORE,
+            reports.size(),
+            predictions,
+            evaluated));
   }
 
   public record ModelEvaluationCheckpoint(

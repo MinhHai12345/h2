@@ -93,11 +93,7 @@ public class WorkflowSubmissionService {
   }
 
   public record SeasonPipelineRequest(
-      String idempotencyKey,
-      long leagueId,
-      long seasonId,
-      long tournamentId,
-      long sofaSeasonId) {
+      String idempotencyKey, long leagueId, long seasonId, long tournamentId, long sofaSeasonId) {
     public SeasonPipelineRequest {
       if (idempotencyKey == null
           || idempotencyKey.isBlank()
@@ -105,8 +101,7 @@ public class WorkflowSubmissionService {
           || seasonId <= 0
           || tournamentId <= 0
           || sofaSeasonId <= 0) {
-        throw new IllegalArgumentException(
-            "Season pipeline identifiers are required and positive");
+        throw new IllegalArgumentException("Season pipeline identifiers are required and positive");
       }
     }
   }

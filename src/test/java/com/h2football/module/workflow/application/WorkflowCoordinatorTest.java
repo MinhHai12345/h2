@@ -38,7 +38,8 @@ class WorkflowCoordinatorTest {
     when(run.getRequestPayload()).thenReturn("{}");
     when(definitions.getRequired("SEASON_PIPELINE")).thenReturn(definition);
     when(checkpoints.isStageCompleted(7L, "DATA_READINESS")).thenReturn(false);
-    when(checkpoints.startStage(eq(7L), anyString(), eq("DATA_READINESS"), eq(0))).thenReturn(1);
+    when(checkpoints.startStage(eq(7L), anyString(), eq("DATA_READINESS"), eq(0)))
+        .thenReturn(1);
     when(checkpoints.failRun(eq(7L), anyString(), eq("Data quality gate rejected the season")))
         .thenReturn(true);
 

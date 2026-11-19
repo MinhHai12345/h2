@@ -33,8 +33,7 @@ public class SofaScoreSeasonWorkflowDispatchJob extends QuartzJobBean {
         context.getScheduledFireTime() == null
             ? context.getFireTime()
             : context.getScheduledFireTime();
-    String idempotencyKey =
-        "sofascore-season-" + canonicalSeasonId + "-" + scheduledAt.getTime();
+    String idempotencyKey = "sofascore-season-" + canonicalSeasonId + "-" + scheduledAt.getTime();
 
     try {
       var run =

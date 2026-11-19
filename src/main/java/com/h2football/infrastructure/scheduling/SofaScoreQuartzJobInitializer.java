@@ -4,9 +4,9 @@ import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobPropertie
 import com.h2football.module.ingestion.scheduling.SofaScoreLeagueCatalogueSyncJob;
 import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
 import com.h2football.module.operations.application.CronJobApplicationService;
-import com.h2football.module.workflow.scheduling.SofaScoreSeasonWorkflowDispatchJob;
 import com.h2football.module.operations.domain.model.CronJob;
 import com.h2football.module.operations.domain.model.CronJobStatus;
+import com.h2football.module.workflow.scheduling.SofaScoreSeasonWorkflowDispatchJob;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
