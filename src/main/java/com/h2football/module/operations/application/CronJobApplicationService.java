@@ -84,11 +84,13 @@ public class CronJobApplicationService {
     validateCron(cronExpression);
     JobKey key = key(job);
     try {
+      if (!scheduler.checkExists(key)) {
+        schedule(job, deserializeJobData(job.getJobDataJson()));
+      }
       Trigger trigger = buildTrigger(job, cronExpression);
       if (scheduler.checkExists(triggerKey(job))) {
         scheduler.rescheduleJob(triggerKey(job), trigger);
       } else {
-        ensureScheduled(job);
         scheduler.scheduleJob(trigger);
       }
       job.updateDefinition(job.getJobClass(), cronExpression, job.getDescription());
