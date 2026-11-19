@@ -32,14 +32,8 @@ class SofaScoreQuartzJobInitializerTest {
     season.setCanonicalSeasonId(42);
     properties.setSeasons(java.util.List.of(season));
 
-    when(
-            cronJobs.registerOrUpdate(
-                anyString(),
-                anyString(),
-                anyString(),
-                anyString(),
-                anyString(),
-                any(JobDataMap.class)))
+    when(cronJobs.registerOrUpdate(
+            anyString(), anyString(), anyString(), anyString(), anyString(), any(JobDataMap.class)))
         .thenReturn(
             new CronJob(
                 "season-17-52186",
