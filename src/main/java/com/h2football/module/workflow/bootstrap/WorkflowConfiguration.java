@@ -17,7 +17,6 @@ public class WorkflowConfiguration {
   WorkflowDefinition sofaScoreSeasonWorkflowDefinition(
       SofaScoreSeasonIngestionStageHandler handler) {
     return new WorkflowDefinition(
-        SOFASCORE_SEASON_SYNC,
-        List.of(new WorkflowStageDefinition("SEASON_INGESTION", handler)));
+        SOFASCORE_SEASON_SYNC, List.of(new WorkflowStageDefinition("SEASON_INGESTION", handler)));
   }
 }

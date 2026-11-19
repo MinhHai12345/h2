@@ -31,10 +31,14 @@ public class WorkflowRecoveryService {
             WorkflowRunStatus.RUNNING, Instant.now(clock));
     for (var run : expiredRuns) {
       try {
-        log.info("Recovering expired workflow lease: runId={}, type={}", run.getId(), run.getWorkflowType());
+        log.info(
+            "Recovering expired workflow lease: runId={}, type={}",
+            run.getId(),
+            run.getWorkflowType());
         coordinator.resume(run.getId());
       } catch (IllegalStateException exception) {
-        log.debug("Workflow recovery skipped for runId={}: {}", run.getId(), exception.getMessage());
+        log.debug(
+            "Workflow recovery skipped for runId={}: {}", run.getId(), exception.getMessage());
       } catch (RuntimeException exception) {
         log.warn("Workflow recovery failed for runId={}", run.getId(), exception);
       }

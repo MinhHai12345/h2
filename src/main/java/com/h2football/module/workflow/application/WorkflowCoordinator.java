@@ -50,11 +50,11 @@ public class WorkflowCoordinator {
         }
         boolean completed = false;
         for (int attempt = 1; attempt <= MAX_STAGE_ATTEMPTS && !completed; attempt++) {
-          int actualAttempt =
-              checkpoints.startStage(run.getId(), owner, stage.key(), index);
+          int actualAttempt = checkpoints.startStage(run.getId(), owner, stage.key(), index);
           try {
             String checkpoint =
-                stage.handler()
+                stage
+                    .handler()
                     .execute(
                         new WorkflowExecutionContext(
                             run.getId(),
@@ -81,14 +81,14 @@ public class WorkflowCoordinator {
       checkpoints.completeRun(run.getId(), owner);
       log.info("Workflow completed: runId={}, type={}", run.getId(), run.getWorkflowType());
     } catch (Exception exception) {
-      boolean failed =
-          checkpoints.failRun(run.getId(), owner, exception.getMessage());
+      boolean failed = checkpoints.failRun(run.getId(), owner, exception.getMessage());
       if (!failed) {
         log.warn(
             "Workflow failure was not recorded because the lease was lost: runId={}",
             run.getId());
       }
-      log.error("Workflow failed: runId={}, type={}", run.getId(), run.getWorkflowType(), exception);
+      log.error(
+          "Workflow failed: runId={}, type={}", run.getId(), run.getWorkflowType(), exception);
     }
     return checkpoints.getRun(run.getId());
   }
