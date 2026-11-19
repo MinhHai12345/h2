@@ -106,5 +106,8 @@ app:
     football-data:
       enabled: ${FOOTBALL_DATA_ENABLED:false}
       api-key: ${FOOTBALL_DATA_API_KEY:}
+      cron: ${FOOTBALL_DATA_INGESTION_CRON:0 0 3 * * ?}
+      run-on-startup: ${FOOTBALL_DATA_INGESTION_RUN_ON_STARTUP:false}
+      seasons: []
     football-data-uk:
       enabled: ${FOOTBALL_DATA_UK_ENABLED:false}

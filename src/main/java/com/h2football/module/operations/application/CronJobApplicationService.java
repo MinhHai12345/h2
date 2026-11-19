@@ -30,6 +30,7 @@ public class CronJobApplicationService {
       Set.of(
           "com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob",
           "com.h2football.module.workflow.scheduling.SofaScoreSeasonWorkflowDispatchJob",
+          "com.h2football.module.workflow.scheduling.ProviderSeasonWorkflowDispatchJob",
           "com.h2football.module.ingestion.scheduling.SofaScoreLeagueCatalogueSyncJob");
   private static final Set<String> TRIGGER_PARAMETERS =
       Set.of("tournamentId", "sofaSeasonId", "canonicalSeasonId");
