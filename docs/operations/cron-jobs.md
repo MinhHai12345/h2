@@ -64,6 +64,7 @@ All endpoints require `X-Ingestion-Admin-Key`, using the same `INGESTION_ADMIN_A
 
 | Method | Endpoint | Purpose |
 |---|---|---|
+| GET | `/api/v1/operations/cron-jobs/metadata` | Read Quartz scheduler metadata |
 | GET | `/api/v1/operations/cron-jobs` | List registered jobs |
 | GET | `/api/v1/operations/cron-jobs/{id}` | Get one job |
 | POST | `/api/v1/operations/cron-jobs/{id}/start` | Trigger immediately |
