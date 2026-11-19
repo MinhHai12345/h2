@@ -42,6 +42,9 @@ public class CronJob {
   @Column(nullable = false, length = 20)
   private CronJobStatus status;
 
+  @Column(name = "job_data_json", columnDefinition = "json")
+  private String jobDataJson;
+
   @Column(name = "last_executed_at")
   private Instant lastExecutedAt;
 
@@ -79,10 +82,13 @@ public class CronJob {
   public String getCronExpression() { return cronExpression; }
   public String getDescription() { return description; }
   public CronJobStatus getStatus() { return status; }
+  public String getJobDataJson() { return jobDataJson; }
   public Instant getLastExecutedAt() { return lastExecutedAt; }
   public CronJobExecutionStatus getLastExecutionStatus() { return lastExecutionStatus; }
   public String getLastExecutionMessage() { return lastExecutionMessage; }
   public long getVersion() { return version; }
+
+  public void updateJobData(String jobDataJson) { this.jobDataJson = jobDataJson; }
 
   public void updateDefinition(String jobClass, String cronExpression, String description) {
     this.jobClass = jobClass;
