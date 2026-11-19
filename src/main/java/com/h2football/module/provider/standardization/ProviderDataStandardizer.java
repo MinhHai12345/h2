@@ -24,6 +24,29 @@ public final class ProviderDataStandardizer {
           Map.entry("championsleague", "UEFA Champions League"),
           Map.entry("fifa world cup", "FIFA World Cup"));
 
+  private static final Map<String, String> STATISTIC_ALIASES =
+      Map.ofEntries(
+          Map.entry("xg", "expectedGoals"),
+          Map.entry("expectedgoals", "expectedGoals"),
+          Map.entry("totalshots", "totalShots"),
+          Map.entry("shots", "totalShots"),
+          Map.entry("shotsontarget", "shotsOnTarget"),
+          Map.entry("shotsinsidebox", "shotsInsideBox"),
+          Map.entry("shotsofftarget", "shotsOffTarget"),
+          Map.entry("possession", "possession"),
+          Map.entry("bigchances", "bigChances"),
+          Map.entry("corners", "corners"),
+          Map.entry("fouls", "fouls"),
+          Map.entry("yellowcards", "yellowCards"),
+          Map.entry("redcards", "redCards"),
+          Map.entry("accuratepasses", "accuratePasses"),
+          Map.entry("passaccuracy", "passAccuracy"),
+          Map.entry("saves", "saves"),
+          Map.entry("offsides", "offsides"),
+          Map.entry("tackles", "tackles"),
+          Map.entry("interceptions", "interceptions"),
+          Map.entry("clearances", "clearances"));
+
   private static final Map<String, String> TEAM_ALIASES =
       Map.ofEntries(
           Map.entry("fcbayernmunchen", "Bayern Munich"),
@@ -78,6 +101,13 @@ public final class ProviderDataStandardizer {
     String cleaned = clean(sourceName);
     if (cleaned == null) return null;
     return LEAGUE_ALIASES.getOrDefault(cleaned.toLowerCase(Locale.ROOT), cleaned);
+  }
+
+  public static String statisticKey(String sourceKey, String sourceName) {
+    String key = clean(sourceKey);
+    String candidate = key == null ? clean(sourceName) : key;
+    if (candidate == null) return null;
+    return STATISTIC_ALIASES.getOrDefault(aliasKey(candidate), candidate);
   }
 
   public static String teamName(String sourceName) {

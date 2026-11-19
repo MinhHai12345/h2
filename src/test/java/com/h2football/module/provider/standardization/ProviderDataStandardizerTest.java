@@ -14,6 +14,16 @@ class ProviderDataStandardizerTest {
   }
 
   @Test
+  void shouldNormalizeProviderStatisticAliasesToCanonicalKeys() {
+    assertThat(ProviderDataStandardizer.statisticKey("xG", "Expected goals"))
+        .isEqualTo("expectedGoals");
+    assertThat(ProviderDataStandardizer.statisticKey("total_shots", "Total shots"))
+        .isEqualTo("totalShots");
+    assertThat(ProviderDataStandardizer.statisticKey("unknownMetric", "Unknown metric"))
+        .isEqualTo("unknownMetric");
+  }
+
+  @Test
   void shouldNormalizeKnownTeamAliasesAcrossProviders() {
     assertThat(ProviderDataStandardizer.teamName("FC Bayern München")).isEqualTo("Bayern Munich");
     assertThat(ProviderDataStandardizer.teamName("Bayern Munich")).isEqualTo("Bayern Munich");
