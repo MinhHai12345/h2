@@ -76,6 +76,24 @@ class SofaScoreMatchDetailIngestionServiceTest {
     verify(playerStatistics, times(1)).sync(100L);
   }
 
+
+  @Test
+  void shouldContinueOtherStreamsWhenStatisticsExhaustsItsOwnRetries() {
+    when(statistics.sync(100L)).thenThrow(new IllegalStateException("statistics unavailable"));
+
+    var result = service.sync(Set.of(100L));
+
+    assertThat(result.statisticsSucceeded()).isZero();
+    assertThat(result.lineupsSucceeded()).isEqualTo(1);
+    assertThat(result.incidentsSucceeded()).isEqualTo(1);
+    assertThat(result.playerStatisticsSucceeded()).isEqualTo(1);
+    assertThat(result.failures()).hasSize(1);
+    verify(statistics, times(2)).sync(100L);
+    verify(lineups).sync(100L);
+    verify(incidents).sync(100L);
+    verify(playerStatistics).sync(100L);
+  }
+
   @Test
   void shouldSkipPlayerStatisticsWhenLineupFailsAfterIndependentRetries() {
     when(lineups.sync(100L)).thenThrow(new IllegalStateException("lineup unavailable"));
