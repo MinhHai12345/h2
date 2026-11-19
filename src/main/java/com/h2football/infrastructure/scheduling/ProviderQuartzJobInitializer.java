@@ -35,7 +35,8 @@ public class ProviderQuartzJobInitializer implements ApplicationRunner {
   public void run(ApplicationArguments args) {
     reconcile(Provider.UNDERSTAT, properties.getUnderstat(), "understat-ingestion");
     reconcile(Provider.FOOTBALL_DATA, properties.getFootballData(), "football-data-ingestion");
-    reconcile(Provider.FOOTBALL_DATA_UK, properties.getFootballDataUk(), "football-data-uk-ingestion");
+    reconcile(
+        Provider.FOOTBALL_DATA_UK, properties.getFootballDataUk(), "football-data-uk-ingestion");
   }
 
   private void reconcile(Provider provider, ProviderConfig config, String group) {
