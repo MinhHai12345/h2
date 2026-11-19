@@ -17,6 +17,7 @@ import org.quartz.JobDetail;
 import org.quartz.JobKey;
 import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
+import org.quartz.SchedulerMetaData;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
@@ -39,6 +40,14 @@ public class CronJobApplicationService {
     this.scheduler = scheduler;
     this.repository = repository;
     this.objectMapper = objectMapper;
+  }
+
+  public SchedulerMetaData getSchedulerMetadata() {
+    try {
+      return scheduler.getMetaData();
+    } catch (SchedulerException exception) {
+      throw new CronJobOperationException("Unable to read Quartz scheduler metadata", exception);
+    }
   }
 
   @Transactional(readOnly = true)
