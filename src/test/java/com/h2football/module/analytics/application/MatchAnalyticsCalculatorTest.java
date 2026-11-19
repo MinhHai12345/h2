@@ -34,22 +34,13 @@ class MatchAnalyticsCalculatorTest {
   void adjustsExpectedGoalsUsingBoundedLineupImpactAndCoverage() {
     BigDecimal boosted =
         calculator.adjustExpectedGoalsByPlayerImpact(
-            new BigDecimal("1.500000"),
-            BigDecimal.ONE,
-            BigDecimal.ZERO,
-            new BigDecimal("100"));
+            new BigDecimal("1.500000"), BigDecimal.ONE, BigDecimal.ZERO, new BigDecimal("100"));
     BigDecimal reduced =
         calculator.adjustExpectedGoalsByPlayerImpact(
-            new BigDecimal("1.500000"),
-            BigDecimal.ZERO,
-            BigDecimal.ONE,
-            new BigDecimal("100"));
+            new BigDecimal("1.500000"), BigDecimal.ZERO, BigDecimal.ONE, new BigDecimal("100"));
     BigDecimal partial =
         calculator.adjustExpectedGoalsByPlayerImpact(
-            new BigDecimal("1.500000"),
-            BigDecimal.ONE,
-            BigDecimal.ZERO,
-            new BigDecimal("40"));
+            new BigDecimal("1.500000"), BigDecimal.ONE, BigDecimal.ZERO, new BigDecimal("40"));
 
     assertThat(boosted).isEqualByComparingTo("1.575000");
     assertThat(reduced).isEqualByComparingTo("1.425000");
@@ -78,10 +69,7 @@ class MatchAnalyticsCalculatorTest {
     assertThatThrownBy(
             () ->
                 calculator.adjustExpectedGoalsByPlayerImpact(
-                    BigDecimal.ONE,
-                    BigDecimal.ONE,
-                    BigDecimal.ZERO,
-                    new BigDecimal("101")))
+                    BigDecimal.ONE, BigDecimal.ONE, BigDecimal.ZERO, new BigDecimal("101")))
         .isInstanceOf(IllegalArgumentException.class);
   }
 
