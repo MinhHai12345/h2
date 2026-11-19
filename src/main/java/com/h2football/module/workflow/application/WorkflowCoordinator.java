@@ -84,8 +84,7 @@ public class WorkflowCoordinator {
       boolean failed = checkpoints.failRun(run.getId(), owner, exception.getMessage());
       if (!failed) {
         log.warn(
-            "Workflow failure was not recorded because the lease was lost: runId={}",
-            run.getId());
+            "Workflow failure was not recorded because the lease was lost: runId={}", run.getId());
       }
       log.error(
           "Workflow failed: runId={}, type={}", run.getId(), run.getWorkflowType(), exception);

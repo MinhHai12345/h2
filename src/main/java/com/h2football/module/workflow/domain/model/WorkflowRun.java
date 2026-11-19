@@ -81,7 +81,8 @@ public class WorkflowRun {
           "Workflow type, idempotency key, payload and createdAt are required");
     }
     if (workflowType.length() > 80 || idempotencyKey.length() > 160) {
-      throw new IllegalArgumentException("Workflow type or idempotency key exceeds its maximum length");
+      throw new IllegalArgumentException(
+          "Workflow type or idempotency key exceeds its maximum length");
     }
     this.workflowType = workflowType;
     this.idempotencyKey = idempotencyKey;

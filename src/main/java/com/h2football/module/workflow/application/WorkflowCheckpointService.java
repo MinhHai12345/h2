@@ -42,7 +42,8 @@ public class WorkflowCheckpointService {
 
   @Transactional(readOnly = true)
   public boolean isStageCompleted(Long runId, String stageKey) {
-    return stages.findByWorkflowRun_IdAndStageKey(runId, stageKey)
+    return stages
+        .findByWorkflowRun_IdAndStageKey(runId, stageKey)
         .map(stage -> stage.getStatus() == WorkflowStageStatus.SUCCEEDED)
         .orElse(false);
   }
@@ -52,7 +53,8 @@ public class WorkflowCheckpointService {
     WorkflowRun run = lockRun(runId);
     ensureLeaseOwner(run, owner);
     WorkflowStageExecution stage =
-        stages.findByWorkflowRun_IdAndStageKey(runId, stageKey)
+        stages
+            .findByWorkflowRun_IdAndStageKey(runId, stageKey)
             .orElseGet(() -> new WorkflowStageExecution(run, stageKey, order));
     stage.start(Instant.now(clock));
     run.selectStage(stageKey);
@@ -60,8 +62,7 @@ public class WorkflowCheckpointService {
   }
 
   @Transactional
-  public void completeStage(
-      Long runId, String owner, String stageKey, String checkpointPayload) {
+  public void completeStage(Long runId, String owner, String stageKey, String checkpointPayload) {
     ensureLeaseOwner(lockRun(runId), owner);
     WorkflowStageExecution stage = findStage(runId, stageKey);
     stage.succeed(checkpointPayload, Instant.now(clock));
@@ -96,8 +97,7 @@ public class WorkflowCheckpointService {
   @Transactional(readOnly = true)
   public WorkflowRun getRun(Long runId) {
     return runs.findById(runId)
-        .orElseThrow(
-            () -> new IllegalArgumentException("Workflow run not found: " + runId));
+        .orElseThrow(() -> new IllegalArgumentException("Workflow run not found: " + runId));
   }
 
   @Transactional(readOnly = true)
@@ -107,14 +107,12 @@ public class WorkflowCheckpointService {
 
   private WorkflowRun lockRun(Long runId) {
     return runs.findByIdForUpdate(runId)
-        .orElseThrow(
-            () -> new IllegalArgumentException("Workflow run not found: " + runId));
+        .orElseThrow(() -> new IllegalArgumentException("Workflow run not found: " + runId));
   }
 
   private WorkflowStageExecution findStage(Long runId, String stageKey) {
     return stages.findByWorkflowRun_IdAndStageKey(runId, stageKey)
-        .orElseThrow(
-            () -> new IllegalArgumentException("Workflow stage not found: " + stageKey));
+        .orElseThrow(() -> new IllegalArgumentException("Workflow stage not found: " + stageKey));
   }
 
   private void ensureLeaseOwner(WorkflowRun run, String owner) {
