@@ -30,9 +30,24 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: false
   quartz:
-    job-store-type: memory
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
     auto-startup: true
     wait-for-jobs-to-complete-on-shutdown: true
+    overwrite-existing-jobs: false
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: H2QuartzScheduler
+            instanceId: AUTO
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            isClustered: ${QUARTZ_CLUSTERED:false}
+            clusterCheckinInterval: ${QUARTZ_CLUSTER_CHECKIN_INTERVAL:15000}
+            misfireThreshold: ${QUARTZ_MISFIRE_THRESHOLD:60000}
   jackson:
     time-zone: UTC
 
