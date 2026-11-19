@@ -17,7 +17,8 @@ import java.time.Instant;
     name = "cron_jobs",
     uniqueConstraints =
         @UniqueConstraint(
-            name = "uk_cron_jobs_name_group", columnNames = {"job_name", "job_group"}))
+            name = "uk_cron_jobs_name_group",
+            columnNames = {"job_name", "job_group"}))
 public class CronJob {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -62,11 +63,7 @@ public class CronJob {
   protected CronJob() {}
 
   public CronJob(
-      String jobName,
-      String jobGroup,
-      String jobClass,
-      String cronExpression,
-      String description) {
+      String jobName, String jobGroup, String jobClass, String cronExpression, String description) {
     this.jobName = jobName;
     this.jobGroup = jobGroup;
     this.jobClass = jobClass;
@@ -75,20 +72,57 @@ public class CronJob {
     this.status = CronJobStatus.SCHEDULED;
   }
 
-  public Long getId() { return id; }
-  public String getJobName() { return jobName; }
-  public String getJobGroup() { return jobGroup; }
-  public String getJobClass() { return jobClass; }
-  public String getCronExpression() { return cronExpression; }
-  public String getDescription() { return description; }
-  public CronJobStatus getStatus() { return status; }
-  public String getJobDataJson() { return jobDataJson; }
-  public Instant getLastExecutedAt() { return lastExecutedAt; }
-  public CronJobExecutionStatus getLastExecutionStatus() { return lastExecutionStatus; }
-  public String getLastExecutionMessage() { return lastExecutionMessage; }
-  public long getVersion() { return version; }
+  public Long getId() {
+    return id;
+  }
 
-  public void updateJobData(String jobDataJson) { this.jobDataJson = jobDataJson; }
+  public String getJobName() {
+    return jobName;
+  }
+
+  public String getJobGroup() {
+    return jobGroup;
+  }
+
+  public String getJobClass() {
+    return jobClass;
+  }
+
+  public String getCronExpression() {
+    return cronExpression;
+  }
+
+  public String getDescription() {
+    return description;
+  }
+
+  public CronJobStatus getStatus() {
+    return status;
+  }
+
+  public String getJobDataJson() {
+    return jobDataJson;
+  }
+
+  public Instant getLastExecutedAt() {
+    return lastExecutedAt;
+  }
+
+  public CronJobExecutionStatus getLastExecutionStatus() {
+    return lastExecutionStatus;
+  }
+
+  public String getLastExecutionMessage() {
+    return lastExecutionMessage;
+  }
+
+  public long getVersion() {
+    return version;
+  }
+
+  public void updateJobData(String jobDataJson) {
+    this.jobDataJson = jobDataJson;
+  }
 
   public void updateDefinition(String jobClass, String cronExpression, String description) {
     this.jobClass = jobClass;
@@ -96,13 +130,20 @@ public class CronJob {
     this.description = description;
   }
 
-  public void markRunning() { this.status = CronJobStatus.RUNNING; }
+  public void markRunning() {
+    this.status = CronJobStatus.RUNNING;
+  }
 
-  public void markScheduled() { this.status = CronJobStatus.SCHEDULED; }
+  public void markScheduled() {
+    this.status = CronJobStatus.SCHEDULED;
+  }
 
-  public void markPaused() { this.status = CronJobStatus.PAUSED; }
+  public void markPaused() {
+    this.status = CronJobStatus.PAUSED;
+  }
 
-  public void recordExecution(CronJobExecutionStatus executionStatus, String message, Instant executedAt) {
+  public void recordExecution(
+      CronJobExecutionStatus executionStatus, String message, Instant executedAt) {
     if (this.status != CronJobStatus.PAUSED) {
       this.status = CronJobStatus.SCHEDULED;
     }
