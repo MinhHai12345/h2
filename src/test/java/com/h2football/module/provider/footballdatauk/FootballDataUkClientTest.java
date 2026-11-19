@@ -28,22 +28,27 @@ class FootballDataUkClientTest {
                 properties.getFootballDataUk().getBaseUrl(),
                 "/mmz4281/{season}/{league}.csv",
                 Map.of(
-                    HttpHeaders.ACCEPT, "text/csv, text/plain, */*",
-                    HttpHeaders.USER_AGENT, "H2-Football-Data-Importer/1.0"),
+                    HttpHeaders.ACCEPT,
+                    "text/csv, text/plain, */*",
+                    HttpHeaders.USER_AGENT,
+                    "H2-Football-Data-Importer/1.0"),
                 Duration.ofSeconds(45),
                 "2425",
                 "E0"))
         .thenReturn(content);
 
     assertEquals(
-        "Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea", client.fetchSeasonCsv("e0", 2024));
+        "Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea",
+        client.fetchSeasonCsv("e0", 2024));
     verify(http)
         .getBytes(
             properties.getFootballDataUk().getBaseUrl(),
             "/mmz4281/{season}/{league}.csv",
             Map.of(
-                HttpHeaders.ACCEPT, "text/csv, text/plain, */*",
-                HttpHeaders.USER_AGENT, "H2-Football-Data-Importer/1.0"),
+                HttpHeaders.ACCEPT,
+                "text/csv, text/plain, */*",
+                HttpHeaders.USER_AGENT,
+                "H2-Football-Data-Importer/1.0"),
             Duration.ofSeconds(45),
             "2425",
             "E0");

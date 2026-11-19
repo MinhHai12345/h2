@@ -25,12 +25,20 @@ public class ProviderHttpClient {
   }
 
   public String getText(
-      String baseUrl, String path, Map<String, String> headers, Duration timeout, Object... variables) {
+      String baseUrl,
+      String path,
+      Map<String, String> headers,
+      Duration timeout,
+      Object... variables) {
     return get(baseUrl, path, headers, String.class, timeout, variables);
   }
 
   public byte[] getBytes(
-      String baseUrl, String path, Map<String, String> headers, Duration timeout, Object... variables) {
+      String baseUrl,
+      String path,
+      Map<String, String> headers,
+      Duration timeout,
+      Object... variables) {
     return get(baseUrl, path, headers, byte[].class, timeout, variables);
   }
 

@@ -22,20 +22,20 @@ class UnderstatClientTest {
     properties.getUnderstat().setEnabled(true);
     UnderstatClient client = new UnderstatClient(http, properties);
     JsonNode expected = new ObjectMapper().readTree("{\"dates\":[]}");
-    when(
-            http.getJson(
-                properties.getUnderstat().getBaseUrl(),
-                "/getLeagueData/{league}/{season}",
-                Map.of(
-                    HttpHeaders.ACCEPT, "application/json, text/javascript, */*; q=0.01",
-                    HttpHeaders.REFERER,
-                    properties.getUnderstat().getBaseUrl() + "/league/epl/2024",
-                    "X-Requested-With",
-                    "XMLHttpRequest"),
-                JsonNode.class,
-                Duration.ofSeconds(30),
-                "epl",
-                2024))
+    when(http.getJson(
+            properties.getUnderstat().getBaseUrl(),
+            "/getLeagueData/{league}/{season}",
+            Map.of(
+                HttpHeaders.ACCEPT,
+                "application/json, text/javascript, */*; q=0.01",
+                HttpHeaders.REFERER,
+                properties.getUnderstat().getBaseUrl() + "/league/epl/2024",
+                "X-Requested-With",
+                "XMLHttpRequest"),
+            JsonNode.class,
+            Duration.ofSeconds(30),
+            "epl",
+            2024))
         .thenReturn(expected);
 
     client.fetchLeagueData("epl", 2024);
@@ -44,9 +44,12 @@ class UnderstatClientTest {
             properties.getUnderstat().getBaseUrl(),
             "/getLeagueData/{league}/{season}",
             Map.of(
-                HttpHeaders.ACCEPT, "application/json, text/javascript, */*; q=0.01",
-                HttpHeaders.REFERER, properties.getUnderstat().getBaseUrl() + "/league/epl/2024",
-                "X-Requested-With", "XMLHttpRequest"),
+                HttpHeaders.ACCEPT,
+                "application/json, text/javascript, */*; q=0.01",
+                HttpHeaders.REFERER,
+                properties.getUnderstat().getBaseUrl() + "/league/epl/2024",
+                "X-Requested-With",
+                "XMLHttpRequest"),
             JsonNode.class,
             Duration.ofSeconds(30),
             "epl",
