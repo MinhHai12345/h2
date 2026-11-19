@@ -279,6 +279,8 @@ public class CronJobApplicationService {
     try {
       Map<String, Object> values =
           objectMapper.readValue(json, new TypeReference<Map<String, Object>>() {});
+      values.replaceAll(
+          (key, value) -> value instanceof Number number ? number.longValue() : value);
       return new JobDataMap(values);
     } catch (JsonProcessingException exception) {
       throw new CronJobOperationException("Unable to restore cron job parameters", exception);
