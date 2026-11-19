@@ -60,6 +60,7 @@ public class SofaScoreSeasonMatchSyncJob extends QuartzJobBean implements Interr
       throw new JobExecutionException("SofaScore season synchronization failed", exception, false);
     } finally {
       executionThread.set(null);
+      Thread.interrupted();
     }
   }
 
