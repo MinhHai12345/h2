@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/ingestion/sofascore")
 public class SofaScoreIngestionController {
   private final SofaScoreMasterDataIngestionService masterDataIngestion;
+  private final com.h2football.module.ingestion.application.SofaScoreSeasonMatchIngestionService seasonMatchIngestion;
   private final SofaScoreMatchIngestionService matchIngestion;
   private final SofaScoreMatchStatisticsIngestionService statisticsIngestion;
   private final SofaScoreMatchLineupIngestionService lineupIngestion;
@@ -31,12 +32,14 @@ public class SofaScoreIngestionController {
 
   public SofaScoreIngestionController(
       SofaScoreMasterDataIngestionService masterDataIngestion,
+      com.h2football.module.ingestion.application.SofaScoreSeasonMatchIngestionService seasonMatchIngestion,
       SofaScoreMatchIngestionService matchIngestion,
       SofaScoreMatchStatisticsIngestionService statisticsIngestion,
       SofaScoreMatchLineupIngestionService lineupIngestion,
       SofaScoreMatchIncidentIngestionService incidentIngestion,
       SofaScorePlayerMatchStatisticsIngestionService playerStatisticsIngestion) {
     this.masterDataIngestion = masterDataIngestion;
+    this.seasonMatchIngestion = seasonMatchIngestion;
     this.matchIngestion = matchIngestion;
     this.statisticsIngestion = statisticsIngestion;
     this.lineupIngestion = lineupIngestion;
@@ -64,6 +67,19 @@ public class SofaScoreIngestionController {
     if (authorization != null)
       return ResponseEntity.status(authorization.getStatusCode()).body(authorization.getBody());
     return ResponseEntity.ok(masterDataIngestion.syncTeams(tournamentId, seasonId));
+  }
+
+  @PostMapping("/seasons/matches/sync")
+  public ResponseEntity<?> syncSeasonMatches(
+      @RequestHeader(name = "X-Ingestion-Admin-Key", required = false) String suppliedApiKey,
+      @RequestParam long tournamentId,
+      @RequestParam long sofaSeasonId,
+      @RequestParam long canonicalSeasonId) {
+    ResponseEntity<Map<String, String>> authorization = authorize(suppliedApiKey);
+    if (authorization != null)
+      return ResponseEntity.status(authorization.getStatusCode()).body(authorization.getBody());
+    return ResponseEntity.ok(
+        seasonMatchIngestion.sync(tournamentId, sofaSeasonId, canonicalSeasonId));
   }
 
   @PostMapping("/matches/sync")
