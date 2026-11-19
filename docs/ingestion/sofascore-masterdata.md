@@ -85,7 +85,7 @@ app:
             canonical-season-id: 42
 ```
 
-Environment variables `SOFASCORE_INGESTION_JOB_ENABLED` and `SOFASCORE_INGESTION_JOB_CRON` control activation and cadence. The season mapping list must be supplied in application configuration. The scheduler uses an in-memory Quartz store; registered jobs are reconstructed from configuration after each restart. The existing secured season-sync API remains available for on-demand execution.
+Environment variables `SOFASCORE_INGESTION_JOB_ENABLED` and `SOFASCORE_INGESTION_JOB_CRON` control activation and cadence. The season mapping list must be supplied in application configuration. The scheduler uses Quartz JDBC tables managed by Flyway, while the `cron_jobs` table is the application-facing job registry. Definitions and their season parameters survive restarts. The secured Cron Job Management API supports listing, pause, resume, stop, immediate start, schedule updates and deletion.
 
 ## Idempotency
 
