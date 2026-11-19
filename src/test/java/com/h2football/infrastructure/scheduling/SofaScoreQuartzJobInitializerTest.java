@@ -11,6 +11,7 @@ import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobPropertie
 import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
 import com.h2football.module.operations.application.CronJobApplicationService;
 import com.h2football.module.operations.domain.model.CronJob;
+import com.h2football.module.workflow.scheduling.SofaScoreSeasonWorkflowDispatchJob;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -38,9 +39,9 @@ class SofaScoreQuartzJobInitializerTest {
             new CronJob(
                 "season-17-52186",
                 "sofascore-ingestion",
-                SofaScoreSeasonMatchSyncJob.class.getName(),
+                SofaScoreSeasonWorkflowDispatchJob.class.getName(),
                 "0 15 2 * * ?",
-                "Synchronize SofaScore teams and match snapshots for configured season"));
+                "Run the complete SofaScore season ingestion and analytics workflow"));
 
     new SofaScoreQuartzJobInitializer(properties, cronJobs).run(null);
 
@@ -50,7 +51,7 @@ class SofaScoreQuartzJobInitializerTest {
         .registerOrUpdate(
             eq("season-17-52186"),
             eq("sofascore-ingestion"),
-            eq(SofaScoreSeasonMatchSyncJob.class.getName()),
+            eq(SofaScoreSeasonWorkflowDispatchJob.class.getName()),
             eq("0 15 2 * * ?"),
             eq("Synchronize SofaScore teams and match snapshots for configured season"),
             data.capture());

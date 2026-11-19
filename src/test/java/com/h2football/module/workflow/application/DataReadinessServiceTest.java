@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.when;
 
+import com.h2football.module.identity.domain.model.Provider;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -47,9 +48,11 @@ class DataReadinessServiceTest {
     doReturn(Timestamp.from(Instant.parse("2026-11-19T09:00:00Z")))
         .when(jdbcTemplate)
         .queryForObject(
-            anyString(), org.mockito.ArgumentMatchers.<RowMapper<Timestamp>>any(), any(Object[].class));
+            anyString(),
+            org.mockito.ArgumentMatchers.<RowMapper<Timestamp>>any(),
+            any(Object[].class));
 
-    var report = service.inspect(42L, com.h2football.module.identity.domain.model.Provider.SOFASCORE);
+    var report = service.inspect(42L, Provider.SOFASCORE);
 
     assertThat(report.status()).isEqualTo("READY");
     assertThat(report.consistent()).isTrue();
@@ -76,9 +79,11 @@ class DataReadinessServiceTest {
     doReturn(Timestamp.from(Instant.parse("2026-11-15T00:00:00Z")))
         .when(jdbcTemplate)
         .queryForObject(
-            anyString(), org.mockito.ArgumentMatchers.<RowMapper<Timestamp>>any(), any(Object[].class));
+            anyString(),
+            org.mockito.ArgumentMatchers.<RowMapper<Timestamp>>any(),
+            any(Object[].class));
 
-    var report = service.inspect(42L, com.h2football.module.identity.domain.model.Provider.SOFASCORE);
+    var report = service.inspect(42L, Provider.SOFASCORE);
 
     assertThat(report.status()).isEqualTo("NEEDS_ATTENTION");
     assertThat(report.consistent()).isFalse();

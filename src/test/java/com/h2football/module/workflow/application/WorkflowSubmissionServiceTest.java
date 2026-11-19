@@ -46,8 +46,7 @@ class WorkflowSubmissionServiceTest {
             definitions, checkpoints, scheduler, seasons, new ObjectMapper());
 
     var submitted =
-        service.submit(
-            new SofaScoreSeasonWorkflowRequest("league-7-season-42", 17L, 52186L, 42L));
+        service.submit(new SofaScoreSeasonWorkflowRequest("league-7-season-42", 17L, 52186L, 42L));
 
     assertThat(submitted).isSameAs(run);
     verify(scheduler).schedule(123L);

@@ -9,8 +9,7 @@ public class DataReadinessStageHandler implements WorkflowStageHandler {
   private final ObjectMapper objectMapper;
   private final DataReadinessService readiness;
 
-  public DataReadinessStageHandler(
-      ObjectMapper objectMapper, DataReadinessService readiness) {
+  public DataReadinessStageHandler(ObjectMapper objectMapper, DataReadinessService readiness) {
     this.objectMapper = objectMapper;
     this.readiness = readiness;
   }
@@ -20,6 +19,15 @@ public class DataReadinessStageHandler implements WorkflowStageHandler {
     SofaScoreSeasonWorkflowRequest request =
         objectMapper.readValue(context.requestPayload(), SofaScoreSeasonWorkflowRequest.class);
     var report = readiness.inspect(request.canonicalSeasonId(), Provider.SOFASCORE);
+    if (!report.consistent()) {
+      throw new WorkflowStageRejectedException(
+          "Data readiness gate rejected season "
+              + report.seasonId()
+              + ": totalMatches="
+              + report.totalMatches()
+              + ", finishedMatchesWithoutScore="
+              + report.finishedMatchesWithoutScore());
+    }
     return objectMapper.writeValueAsString(report);
   }
 }

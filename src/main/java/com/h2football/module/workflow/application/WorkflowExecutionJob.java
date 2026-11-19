@@ -33,7 +33,8 @@ public class WorkflowExecutionJob extends QuartzJobBean {
       throw exception;
     } catch (RuntimeException exception) {
       log.error("Workflow execution job failed: runId={}", runId, exception);
-      throw new JobExecutionException("Workflow execution failed for run " + runId, exception, false);
+      throw new JobExecutionException(
+          "Workflow execution failed for run " + runId, exception, false);
     }
   }
 }

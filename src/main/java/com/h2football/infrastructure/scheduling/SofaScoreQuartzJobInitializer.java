@@ -4,6 +4,7 @@ import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobPropertie
 import com.h2football.module.ingestion.scheduling.SofaScoreLeagueCatalogueSyncJob;
 import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
 import com.h2football.module.operations.application.CronJobApplicationService;
+import com.h2football.module.workflow.scheduling.SofaScoreSeasonWorkflowDispatchJob;
 import com.h2football.module.operations.domain.model.CronJob;
 import com.h2football.module.operations.domain.model.CronJobStatus;
 import java.util.LinkedHashSet;
@@ -94,9 +95,9 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
           cronJobs.registerOrUpdate(
               name,
               SEASON_GROUP,
-              SofaScoreSeasonMatchSyncJob.class.getName(),
+              SofaScoreSeasonWorkflowDispatchJob.class.getName(),
               properties.getCron(),
-              "Synchronize SofaScore teams and match snapshots for configured season",
+              "Run the complete SofaScore season ingestion and analytics workflow",
               data);
       job = resumeIfPaused(job);
       if (properties.isRunOnStartup()) {

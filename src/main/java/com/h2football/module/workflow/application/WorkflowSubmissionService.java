@@ -105,7 +105,8 @@ public class WorkflowSubmissionService {
           || seasonId <= 0
           || tournamentId <= 0
           || sofaSeasonId <= 0) {
-        throw new IllegalArgumentException("Season pipeline identifiers are required and positive");
+        throw new IllegalArgumentException(
+            "Season pipeline identifiers are required and positive");
       }
     }
   }

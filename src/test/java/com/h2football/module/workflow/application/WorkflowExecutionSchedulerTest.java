@@ -2,7 +2,7 @@ package com.h2football.module.workflow.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,13 +34,13 @@ class WorkflowExecutionSchedulerTest {
     verify(scheduler).scheduleJob(jobCaptor.capture(), triggerCaptor.capture());
     assertThat(jobCaptor.getValue().getJobClass()).isEqualTo(WorkflowExecutionJob.class);
     assertThat(jobCaptor.getValue().requestsRecovery()).isTrue();
-    assertThat(jobCaptor.getValue().getJobDataMap().getLong(WorkflowExecutionScheduler.RUN_ID))
+    assertThat(jobCaptor.getValue().getJobDataMap().getLongValue(WorkflowExecutionScheduler.RUN_ID))
         .isEqualTo(123L);
     assertThat(triggerCaptor.getValue().getJobKey()).isEqualTo(jobCaptor.getValue().getKey());
   }
 
   @Test
-  void shouldNotQueueDuplicateTriggerWhileJobIsAlreadyQueued() throws Exception {
+  void shouldReTriggerAnExistingDurableJobAfterItsTriggerHasBeenConsumed() throws Exception {
     when(scheduler.checkExists(any(JobKey.class))).thenReturn(true);
     when(scheduler.getCurrentlyExecutingJobs()).thenReturn(List.of());
     when(scheduler.getTriggersOfJob(any(JobKey.class))).thenReturn(List.of());
@@ -50,5 +50,17 @@ class WorkflowExecutionSchedulerTest {
 
     verify(scheduler).triggerJob(any(JobKey.class), any());
     verify(scheduler, never()).scheduleJob(any(JobDetail.class), any(Trigger.class));
+  }
+
+  @Test
+  void shouldNotAddAnotherTriggerWhenAnExistingTriggerIsPending() throws Exception {
+    when(scheduler.checkExists(any(JobKey.class))).thenReturn(true);
+    when(scheduler.getCurrentlyExecutingJobs()).thenReturn(List.of());
+    when(scheduler.getTriggersOfJob(any(JobKey.class))).thenReturn(List.of(mock(Trigger.class)));
+    WorkflowExecutionScheduler executionScheduler = new WorkflowExecutionScheduler(scheduler);
+
+    executionScheduler.schedule(123L);
+
+    verify(scheduler, never()).triggerJob(any(JobKey.class), any());
   }
 }
