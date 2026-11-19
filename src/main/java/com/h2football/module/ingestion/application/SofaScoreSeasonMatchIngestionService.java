@@ -17,11 +17,15 @@ public class SofaScoreSeasonMatchIngestionService {
 
   private final SofaScoreMasterDataIngestionService masterData;
   private final SofaScoreMatchIngestionService matches;
+  private final SofaScoreMatchDetailIngestionService matchDetails;
 
   public SofaScoreSeasonMatchIngestionService(
-      SofaScoreMasterDataIngestionService masterData, SofaScoreMatchIngestionService matches) {
+      SofaScoreMasterDataIngestionService masterData,
+      SofaScoreMatchIngestionService matches,
+      SofaScoreMatchDetailIngestionService matchDetails) {
     this.masterData = masterData;
     this.matches = matches;
+    this.matchDetails = matchDetails;
   }
 
   public SeasonMatchSyncResult sync(long tournamentId, long sofaSeasonId, long canonicalSeasonId) {
@@ -74,6 +78,13 @@ public class SofaScoreSeasonMatchIngestionService {
     int created = windows.stream().mapToInt(WindowSyncResult::createdMatches).sum();
     int updated = windows.stream().mapToInt(WindowSyncResult::updatedMatches).sum();
     int skipped = windows.stream().mapToInt(WindowSyncResult::skippedEvents).sum();
+    var detailResult = matchDetails.sync(eventIds);
+    if (detailResult.hasFailures()) {
+      throw new IllegalStateException(
+          "SofaScore match-detail ingestion completed with "
+              + detailResult.failures().size()
+              + " failed stream tasks; inspect match-detail logs for independent retry results");
+    }
     List<String> warnings = new ArrayList<>(teams.warnings());
     windows.forEach(result -> warnings.addAll(result.warnings()));
 
@@ -87,6 +98,7 @@ public class SofaScoreSeasonMatchIngestionService {
         updated,
         skipped,
         eventIds.size(),
+        detailResult,
         List.copyOf(windows),
         List.copyOf(warnings));
   }
@@ -116,6 +128,7 @@ public class SofaScoreSeasonMatchIngestionService {
       int updatedMatches,
       int skippedEvents,
       int uniqueEvents,
+      SofaScoreMatchDetailIngestionService.DetailSyncResult matchDetails,
       List<WindowSyncResult> windows,
       List<String> warnings) {}
 }
