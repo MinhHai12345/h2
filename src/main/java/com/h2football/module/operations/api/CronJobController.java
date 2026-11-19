@@ -31,6 +31,22 @@ public class CronJobController {
     this.cronJobs = cronJobs;
   }
 
+  @GetMapping("/metadata")
+  public ResponseEntity<?> metadata(
+      @RequestHeader(name = "X-Ingestion-Admin-Key", required = false) String apiKey) {
+    ResponseEntity<?> denied = authorize(apiKey);
+    if (denied != null) return denied;
+    var metadata = cronJobs.getSchedulerMetadata();
+    return ResponseEntity.ok(
+        new SchedulerMetadataResponse(
+            metadata.getSchedulerName(),
+            metadata.getSchedulerInstanceId(),
+            metadata.isStarted(),
+            metadata.isInStandbyMode(),
+            metadata.isShutdown(),
+            metadata.getNumberOfJobsExecuted()));
+  }
+
   @GetMapping
   public ResponseEntity<?> findAll(
       @RequestHeader(name = "X-Ingestion-Admin-Key", required = false) String apiKey) {
@@ -126,4 +142,12 @@ public class CronJobController {
   }
 
   public record ScheduleRequest(String cronExpression) {}
+
+  public record SchedulerMetadataResponse(
+      String schedulerName,
+      String instanceId,
+      boolean started,
+      boolean inStandbyMode,
+      boolean shutdown,
+      int executedJobCount) {}
 }
