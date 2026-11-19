@@ -71,8 +71,9 @@ public class SofaScoreMatchIngestionService {
     int skipped = 0;
     List<Long> eventIds = new ArrayList<>();
     for (SofaScoreEventSnapshot event : events) {
+      long eventId;
       try {
-        eventIds.add(Long.parseLong(event.externalId()));
+        eventId = Long.parseLong(event.externalId());
       } catch (NumberFormatException ignored) {
         warnings.add("Skipped invalid SofaScore event identifier: " + event.externalId());
         skipped++;
@@ -102,6 +103,7 @@ public class SofaScoreMatchIngestionService {
               event.homeScore(),
               event.awayScore(),
               event.roundName());
+      eventIds.add(eventId);
       if (inserted) created++;
       else updated++;
     }

@@ -12,6 +12,7 @@ public class SofaScoreIngestionJobProperties {
   private boolean runOnStartup;
   private List<Season> seasons = new ArrayList<>();
   private final LeagueCatalogue leagueCatalogue = new LeagueCatalogue();
+  private final MatchDetails matchDetails = new MatchDetails();
 
   public boolean isEnabled() {
     return enabled;
@@ -47,6 +48,10 @@ public class SofaScoreIngestionJobProperties {
 
   public LeagueCatalogue getLeagueCatalogue() {
     return leagueCatalogue;
+  }
+
+  public MatchDetails getMatchDetails() {
+    return matchDetails;
   }
 
   public static class LeagueCatalogue {
@@ -86,6 +91,36 @@ public class SofaScoreIngestionJobProperties {
     public void setTournamentIds(List<Long> tournamentIds) {
       this.tournamentIds =
           tournamentIds == null ? new ArrayList<>() : new ArrayList<>(tournamentIds);
+    }
+  }
+
+  public static class MatchDetails {
+    private boolean enabled;
+    private int retryAttempts = 3;
+    private long retryDelayMillis = 1000;
+
+    public boolean isEnabled() {
+      return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+      this.enabled = enabled;
+    }
+
+    public int getRetryAttempts() {
+      return retryAttempts;
+    }
+
+    public void setRetryAttempts(int retryAttempts) {
+      this.retryAttempts = retryAttempts;
+    }
+
+    public long getRetryDelayMillis() {
+      return retryDelayMillis;
+    }
+
+    public void setRetryDelayMillis(long retryDelayMillis) {
+      this.retryDelayMillis = retryDelayMillis;
     }
   }
 

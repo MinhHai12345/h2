@@ -75,6 +75,10 @@ app:
         enabled: ${SOFASCORE_INGESTION_JOB_ENABLED:false}
         cron: ${SOFASCORE_INGESTION_JOB_CRON:0 15 2 * * ?}
         run-on-startup: ${SOFASCORE_INGESTION_JOB_RUN_ON_STARTUP:false}
+        match-details:
+          enabled: ${SOFASCORE_MATCH_DETAILS_ENABLED:false}
+          retry-attempts: ${SOFASCORE_MATCH_DETAILS_RETRY_ATTEMPTS:3}
+          retry-delay-millis: ${SOFASCORE_MATCH_DETAILS_RETRY_DELAY_MILLIS:1000}
         seasons: []
         league-catalogue:
           enabled: ${SOFASCORE_LEAGUE_CATALOGUE_JOB_ENABLED:false}
