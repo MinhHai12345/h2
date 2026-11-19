@@ -96,7 +96,6 @@ class ProviderSeasonPersistenceServiceTest {
     when(seasons.findById(20L)).thenReturn(Optional.of(season));
     when(season.getLeague()).thenReturn(league);
     when(league.getCountry()).thenReturn(country);
-    when(country.getId()).thenReturn(1L);
     when(teams.findAll()).thenReturn(List.of());
     when(teams.save(any(Team.class))).thenReturn(home, away);
     when(home.getId()).thenReturn(101L);

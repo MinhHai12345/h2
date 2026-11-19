@@ -23,7 +23,7 @@ class ProviderSeasonWorkflowRequestTest {
                 new ProviderSeasonWorkflowRequest(
                     "sofa-2024", Provider.SOFASCORE, 10L, "17", 2024))
         .isInstanceOf(IllegalArgumentException.class)
-        .hasMessageContaining("dedicated ingestion pipeline");
+        .hasMessageContaining("SofaScore ingestion");
   }
 
   @Test
