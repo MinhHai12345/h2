@@ -22,8 +22,7 @@ class SofaScoreQuartzJobInitializerTest {
     SofaScoreIngestionJobProperties properties = new SofaScoreIngestionJobProperties();
     properties.setEnabled(true);
     properties.setCron("0 15 2 * * ?");
-    SofaScoreIngestionJobProperties.Season season =
-        new SofaScoreIngestionJobProperties.Season();
+    SofaScoreIngestionJobProperties.Season season = new SofaScoreIngestionJobProperties.Season();
     season.setTournamentId(17);
     season.setSofaSeasonId(52186);
     season.setCanonicalSeasonId(42);
