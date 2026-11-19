@@ -76,7 +76,6 @@ class SofaScoreMatchDetailIngestionServiceTest {
     verify(playerStatistics, times(1)).sync(100L);
   }
 
-
   @Test
   void shouldContinueOtherStreamsWhenStatisticsExhaustsItsOwnRetries() {
     when(statistics.sync(100L)).thenThrow(new IllegalStateException("statistics unavailable"));
