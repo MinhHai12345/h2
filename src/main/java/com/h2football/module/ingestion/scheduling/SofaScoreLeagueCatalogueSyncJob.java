@@ -15,8 +15,7 @@ import org.springframework.scheduling.quartz.QuartzJobBean;
 public class SofaScoreLeagueCatalogueSyncJob extends QuartzJobBean {
   public static final String TOURNAMENT_IDS = "tournamentIds";
 
-  private static final Logger log =
-      LoggerFactory.getLogger(SofaScoreLeagueCatalogueSyncJob.class);
+  private static final Logger log = LoggerFactory.getLogger(SofaScoreLeagueCatalogueSyncJob.class);
 
   private final SofaScoreMasterDataIngestionService ingestionService;
 
