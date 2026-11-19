@@ -2,6 +2,7 @@ package com.h2football.module.provider.sofascore.mapper;
 
 import com.h2football.module.provider.sofascore.dto.SofaScoreDtos;
 import com.h2football.module.provider.sofascore.model.SofaScoreStatisticSnapshot;
+import com.h2football.module.provider.standardization.ProviderDataStandardizer;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Locale;
@@ -39,7 +40,8 @@ public class SofaScoreStatisticsMapper {
       SofaScoreDtos.StatisticGroup group,
       SofaScoreDtos.StatisticItem item) {
     String p = clean(period.period()), g = clean(group.groupName());
-    String key = clean(item.key()), name = clean(item.name());
+    String sourceKey = clean(item.key()), name = clean(item.name());
+    String key = ProviderDataStandardizer.statisticKey(sourceKey, name);
     if (p == null || g == null || key == null || name == null) return null;
     return new SofaScoreStatisticSnapshot(
         p.toUpperCase(Locale.ROOT),

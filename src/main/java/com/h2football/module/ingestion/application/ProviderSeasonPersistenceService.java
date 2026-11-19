@@ -13,7 +13,7 @@ import com.h2football.module.match.domain.model.Match;
 import com.h2football.module.match.domain.model.MatchStatus;
 import com.h2football.module.match.domain.repository.MatchRepository;
 import com.h2football.module.provider.MultiProviderSeasonDataClient.ProviderMatchRecord;
-import java.text.Normalizer;
+import com.h2football.module.provider.standardization.ProviderDataStandardizer;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -192,7 +192,9 @@ public class ProviderSeasonPersistenceService {
       String sourceName,
       List<Team> knownTeams) {
     String normalizedExternalId =
-        externalId == null || externalId.isBlank() ? normalize(sourceName) : externalId.trim();
+        externalId == null || externalId.isBlank()
+            ? ProviderDataStandardizer.teamMatchKey(sourceName)
+            : externalId.trim();
     var mapped = identities.findCanonicalId(ResourceType.TEAM, provider, normalizedExternalId);
     if (mapped.isPresent()) {
       return teams
@@ -203,10 +205,13 @@ public class ProviderSeasonPersistenceService {
                       "External team identity points to missing canonical team " + mapped.get()));
     }
 
-    String normalizedName = normalize(sourceName);
+    String canonicalName = ProviderDataStandardizer.teamName(sourceName);
+    String normalizedName = ProviderDataStandardizer.teamMatchKey(canonicalName);
     List<Team> candidates =
         knownTeams.stream()
-            .filter(team -> normalize(team.getName()).equals(normalizedName))
+            .filter(
+                team ->
+                    ProviderDataStandardizer.teamMatchKey(team.getName()).equals(normalizedName))
             .toList();
     if (candidates.size() > 1) {
       List<Team> leagueCountryCandidates =
@@ -222,7 +227,7 @@ public class ProviderSeasonPersistenceService {
     }
     Team canonical =
         candidates.isEmpty()
-            ? teams.save(new Team(sourceName.trim(), season.getLeague().getCountry()))
+            ? teams.save(new Team(canonicalName, season.getLeague().getCountry()))
             : candidates.get(0);
     if (candidates.isEmpty()) knownTeams.add(canonical);
     identities.register(ResourceType.TEAM, provider, normalizedExternalId, canonical.getId());
@@ -241,14 +246,6 @@ public class ProviderSeasonPersistenceService {
       case "SCHEDULED", "TIMED", "NOT_STARTED", "NS" -> MatchStatus.NOT_STARTED;
       default -> MatchStatus.UNKNOWN;
     };
-  }
-
-  private static String normalize(String value) {
-    return Normalizer.normalize(value == null ? "" : value, Normalizer.Form.NFD)
-        .replaceAll("\\p{M}", "")
-        .toLowerCase(Locale.ROOT)
-        .replaceAll("\\b(football club|fc|afc|cf|sc|club)\\b", "")
-        .replaceAll("[^a-z0-9]", "");
   }
 
   public record ProviderSeasonSyncResult(
