@@ -48,8 +48,7 @@ public class MasterDataReconciliationService {
       result.addAll(leagueCandidates());
     if (resourceType == null || resourceType == ResourceType.SEASON)
       result.addAll(seasonCandidates());
-    if (resourceType == null || resourceType == ResourceType.TEAM)
-      result.addAll(teamCandidates());
+    if (resourceType == null || resourceType == ResourceType.TEAM) result.addAll(teamCandidates());
     if (resourceType == null || resourceType == ResourceType.PLAYER)
       result.addAll(playerCandidates());
     return result.stream()
@@ -61,9 +60,7 @@ public class MasterDataReconciliationService {
     Map<String, List<EntityReference>> groups = new TreeMap<>();
     for (League item : leagues.findAll()) {
       String key =
-          item.getCountry().getId()
-              + "|"
-              + ProviderDataStandardizer.leagueMatchKey(item.getName());
+          item.getCountry().getId() + "|" + ProviderDataStandardizer.leagueMatchKey(item.getName());
       add(
           groups,
           key,
@@ -91,9 +88,7 @@ public class MasterDataReconciliationService {
     Map<String, List<EntityReference>> groups = new TreeMap<>();
     for (Team item : teams.findAll()) {
       String key =
-          item.getCountry().getId()
-              + "|"
-              + ProviderDataStandardizer.teamMatchKey(item.getName());
+          item.getCountry().getId() + "|" + ProviderDataStandardizer.teamMatchKey(item.getName());
       add(
           groups,
           key,

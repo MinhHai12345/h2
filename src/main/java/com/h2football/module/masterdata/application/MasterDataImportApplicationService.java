@@ -95,8 +95,7 @@ public class MasterDataImportApplicationService {
       league = candidates.get(0);
     } else {
       League existingByCode = leagues.findByCode(normalizedCode).orElse(null);
-      if (existingByCode != null
-          && !existingByCode.getCountry().getId().equals(countryId)) {
+      if (existingByCode != null && !existingByCode.getCountry().getId().equals(countryId)) {
         throw new IllegalStateException(
             "Provider league code is already used by a different canonical country: "
                 + normalizedCode);

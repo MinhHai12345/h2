@@ -23,8 +23,7 @@ public class ProviderMasterDataMappingController {
   private final MasterDataReconciliationService reconciliation;
 
   public ProviderMasterDataMappingController(
-      ProviderMasterDataMappingService mappings,
-      MasterDataReconciliationService reconciliation) {
+      ProviderMasterDataMappingService mappings, MasterDataReconciliationService reconciliation) {
     this.mappings = mappings;
     this.reconciliation = reconciliation;
   }
