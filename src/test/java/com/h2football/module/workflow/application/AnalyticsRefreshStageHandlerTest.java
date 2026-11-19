@@ -41,7 +41,6 @@ class AnalyticsRefreshStageHandlerTest {
     when(upcoming.getId()).thenReturn(1L);
     when(upcoming.getKickoffAt()).thenReturn(now.plusSeconds(3600));
     when(upcoming.getStatus()).thenReturn(MatchStatus.NOT_STARTED);
-    when(completed.getId()).thenReturn(2L);
     when(completed.getKickoffAt()).thenReturn(now.minusSeconds(3600));
     when(completed.getStatus()).thenReturn(MatchStatus.FINISHED);
     when(matches.findAllBySeasonIdOrderByKickoffAtAsc(42L))
