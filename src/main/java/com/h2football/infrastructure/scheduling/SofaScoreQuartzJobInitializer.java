@@ -39,8 +39,7 @@ public class SofaScoreQuartzJobInitializer implements ApplicationRunner {
   }
 
   private void reconcileLeagueCatalogueJob() {
-    SofaScoreIngestionJobProperties.LeagueCatalogue catalogue =
-        properties.getLeagueCatalogue();
+    SofaScoreIngestionJobProperties.LeagueCatalogue catalogue = properties.getLeagueCatalogue();
     if (!catalogue.isEnabled()) {
       cronJobs.pauseGroup(LEAGUE_GROUP);
       log.info("SofaScore league catalogue job is disabled; existing job was paused");
