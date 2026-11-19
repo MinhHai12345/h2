@@ -17,6 +17,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -102,7 +103,7 @@ public class PlayerImpactApplicationService {
       MatchLineup lineup,
       Map<Long, List<MatchPlayerStatistic>> historyByPlayer) {
     if (lineup == null) {
-      return new TeamImpact(teamId, teamName, false, null, 0, 0, null, null, List.of());
+      return new TeamImpact(teamId, teamName, false, null, 0, 0, null, null, null, null, List.of());
     }
     List<PlayerImpactResponse> players =
         lineup.getPlayers().stream()
@@ -123,11 +124,7 @@ public class PlayerImpactApplicationService {
             .filter(java.util.Objects::nonNull)
             .toList();
     BigDecimal average =
-        availableScores.isEmpty()
-            ? null
-            : availableScores.stream()
-                .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .divide(BigDecimal.valueOf(availableScores.size()), SCALE, RoundingMode.HALF_UP);
+        average(availableScores);
     BigDecimal coverage =
         players.isEmpty()
             ? BigDecimal.ZERO.setScale(SCALE)
@@ -142,8 +139,28 @@ public class PlayerImpactApplicationService {
         players.size(),
         availableScores.size(),
         average,
+        averageComponent(players, PlayerImpactResponse::attackingIndex),
+        averageComponent(players, PlayerImpactResponse::defensiveIndex),
         coverage,
         players);
+  }
+
+  private BigDecimal averageComponent(
+      List<PlayerImpactResponse> players,
+      Function<PlayerImpactResponse, BigDecimal> componentExtractor) {
+    return average(
+        players.stream()
+            .map(componentExtractor)
+            .filter(java.util.Objects::nonNull)
+            .toList());
+  }
+
+  private BigDecimal average(List<BigDecimal> values) {
+    return values.isEmpty()
+        ? null
+        : values.stream()
+            .reduce(BigDecimal.ZERO, BigDecimal::add)
+            .divide(BigDecimal.valueOf(values.size()), SCALE, RoundingMode.HALF_UP);
   }
 
   private PlayerImpactResponse toPlayerResponse(
@@ -183,6 +200,8 @@ public class PlayerImpactApplicationService {
       int startingPlayers,
       int playersWithHistoricalData,
       BigDecimal averageStartingImpact,
+      BigDecimal averageAttackingIndex,
+      BigDecimal averageDefensiveIndex,
       BigDecimal dataCoveragePercent,
       List<PlayerImpactResponse> players) {}
 

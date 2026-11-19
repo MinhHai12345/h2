@@ -12,6 +12,7 @@ public class MatchAnalyticsCalculator {
   private static final BigDecimal ONE = BigDecimal.ONE;
   private static final BigDecimal HUNDRED = BigDecimal.valueOf(100);
   private static final BigDecimal MAX_EXPECTED_GOALS = new BigDecimal("15");
+  private static final BigDecimal PLAYER_IMPACT_ADJUSTMENT_LIMIT = new BigDecimal("0.05");
 
   public BigDecimal calculateEmaForm(List<Integer> pointsNewestFirst, int period) {
     if (pointsNewestFirst == null || period <= 0) {
@@ -33,6 +34,41 @@ public class MatchAnalyticsCalculator {
               .add(ONE.subtract(alpha).multiply(ema));
     }
     return ema.divide(BigDecimal.valueOf(3), SCALE, RoundingMode.HALF_UP);
+  }
+
+  public BigDecimal adjustExpectedGoalsByPlayerImpact(
+      BigDecimal baseExpectedGoals,
+      BigDecimal teamAttackingIndex,
+      BigDecimal opponentDefensiveIndex,
+      BigDecimal combinedCoveragePercent) {
+    validateExpectedGoals(baseExpectedGoals, "baseExpectedGoals");
+    if (teamAttackingIndex == null
+        || opponentDefensiveIndex == null
+        || combinedCoveragePercent == null) {
+      return baseExpectedGoals.setScale(6, RoundingMode.HALF_UP);
+    }
+    validateIndex(teamAttackingIndex, "teamAttackingIndex");
+    validateIndex(opponentDefensiveIndex, "opponentDefensiveIndex");
+    if (combinedCoveragePercent.compareTo(BigDecimal.ZERO) < 0
+        || combinedCoveragePercent.compareTo(HUNDRED) > 0) {
+      throw new IllegalArgumentException("combinedCoveragePercent must be between 0 and 100");
+    }
+    BigDecimal coverage =
+        combinedCoveragePercent.divide(HUNDRED, SCALE, RoundingMode.HALF_UP);
+    BigDecimal relativeStrength = teamAttackingIndex.subtract(opponentDefensiveIndex);
+    BigDecimal adjustment =
+        ONE.add(PLAYER_IMPACT_ADJUSTMENT_LIMIT.multiply(relativeStrength).multiply(coverage));
+    return baseExpectedGoals
+        .multiply(adjustment)
+        .max(BigDecimal.ZERO)
+        .min(MAX_EXPECTED_GOALS)
+        .setScale(6, RoundingMode.HALF_UP);
+  }
+
+  private void validateIndex(BigDecimal value, String field) {
+    if (value.compareTo(BigDecimal.ZERO) < 0 || value.compareTo(ONE) > 0) {
+      throw new IllegalArgumentException(field + " must be between 0 and 1");
+    }
   }
 
   public MatchProbabilities calculateProbabilities(
