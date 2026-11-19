@@ -4,6 +4,7 @@ import com.h2football.module.masterdata.domain.model.Country;
 import com.h2football.module.masterdata.domain.model.Team;
 import com.h2football.module.masterdata.domain.repository.CountryRepository;
 import com.h2football.module.masterdata.domain.repository.TeamRepository;
+import com.h2football.module.provider.standardization.ProviderDataStandardizer;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,7 +25,7 @@ public class TeamApplicationService {
         countries
             .findById(countryId)
             .orElseThrow(() -> new MasterDataNotFoundException("Country", countryId));
-    String normalizedName = name.trim();
+    String normalizedName = ProviderDataStandardizer.teamName(name);
     if (teams.existsByCountryIdAndNameIgnoreCase(countryId, normalizedName))
       throw new DuplicateMasterDataException("Team already exists in country: " + normalizedName);
     return teams.save(new Team(normalizedName, country));

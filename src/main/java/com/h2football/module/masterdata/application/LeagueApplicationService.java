@@ -1,6 +1,7 @@
 package com.h2football.module.masterdata.application;
 
 import com.h2football.module.masterdata.domain.model.*;
+import com.h2football.module.provider.standardization.ProviderDataStandardizer;
 import com.h2football.module.masterdata.domain.repository.*;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,8 @@ public class LeagueApplicationService {
         countries
             .findById(countryId)
             .orElseThrow(() -> new MasterDataNotFoundException("Country", countryId));
-    return leagues.save(new League(normalizedCode, name.trim(), country));
+    String canonicalName = ProviderDataStandardizer.leagueName(name);
+    return leagues.save(new League(normalizedCode, canonicalName, country));
   }
 
   @Transactional(readOnly = true)
