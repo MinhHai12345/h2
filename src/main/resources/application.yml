@@ -42,6 +42,8 @@ spring:
           scheduler:
             instanceName: H2QuartzScheduler
             instanceId: AUTO
+          threadPool:
+            threadCount: ${WORKFLOW_MAX_PARALLELISM:4}
           jobStore:
             driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
             tablePrefix: QRTZ_
@@ -67,6 +69,10 @@ management:
 
 app:
   time-zone: ${APP_TIME_ZONE:UTC}
+  workflow:
+    recovery-delay-millis: ${WORKFLOW_RECOVERY_DELAY_MILLIS:60000}
+    data-readiness:
+      stale-after-hours: ${WORKFLOW_DATA_STALE_AFTER_HOURS:72}
   ingestion:
     operations:
       api-key: ${INGESTION_ADMIN_API_KEY:}

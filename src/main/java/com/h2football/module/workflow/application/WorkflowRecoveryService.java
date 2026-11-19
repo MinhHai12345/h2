@@ -14,34 +14,31 @@ public class WorkflowRecoveryService {
   private static final Logger log = LoggerFactory.getLogger(WorkflowRecoveryService.class);
 
   private final WorkflowRunRepository runs;
-  private final WorkflowCoordinator coordinator;
+  private final WorkflowExecutionScheduler scheduler;
   private final Clock clock;
 
   public WorkflowRecoveryService(
-      WorkflowRunRepository runs, WorkflowCoordinator coordinator, Clock clock) {
+      WorkflowRunRepository runs, WorkflowExecutionScheduler scheduler, Clock clock) {
     this.runs = runs;
-    this.coordinator = coordinator;
+    this.scheduler = scheduler;
     this.clock = clock;
   }
 
   @Scheduled(fixedDelayString = "${app.workflow.recovery-delay-millis:60000}")
-  public void recoverExpiredRuns() {
-    var expiredRuns =
-        runs.findTop20ByStatusAndLeaseExpiresAtBeforeOrderByCreatedAtAsc(
-            WorkflowRunStatus.RUNNING, Instant.now(clock));
-    for (var run : expiredRuns) {
-      try {
-        log.info(
-            "Recovering expired workflow lease: runId={}, type={}",
-            run.getId(),
-            run.getWorkflowType());
-        coordinator.resume(run.getId());
-      } catch (IllegalStateException exception) {
-        log.debug(
-            "Workflow recovery skipped for runId={}: {}", run.getId(), exception.getMessage());
-      } catch (RuntimeException exception) {
-        log.warn("Workflow recovery failed for runId={}", run.getId(), exception);
-      }
+  public void recoverPendingAndExpiredRuns() {
+    runs.findTop20ByStatusOrderByCreatedAtAsc(WorkflowRunStatus.PENDING)
+        .forEach(run -> scheduleRecovery(run.getId(), run.getWorkflowType()));
+    runs.findTop20ByStatusAndLeaseExpiresAtBeforeOrderByCreatedAtAsc(
+            WorkflowRunStatus.RUNNING, Instant.now(clock))
+        .forEach(run -> scheduleRecovery(run.getId(), run.getWorkflowType()));
+  }
+
+  private void scheduleRecovery(Long runId, String workflowType) {
+    try {
+      scheduler.schedule(runId);
+      log.info("Scheduled workflow recovery: runId={}, type={}", runId, workflowType);
+    } catch (RuntimeException exception) {
+      log.warn("Unable to schedule workflow recovery: runId={}", runId, exception);
     }
   }
 }

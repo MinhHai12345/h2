@@ -16,6 +16,8 @@ public interface WorkflowRunRepository extends JpaRepository<WorkflowRun, Long> 
   Optional<WorkflowRun> findByWorkflowTypeAndIdempotencyKey(
       String workflowType, String idempotencyKey);
 
+  List<WorkflowRun> findTop20ByStatusOrderByCreatedAtAsc(WorkflowRunStatus status);
+
   List<WorkflowRun> findTop20ByStatusAndLeaseExpiresAtBeforeOrderByCreatedAtAsc(
       WorkflowRunStatus status, Instant leaseExpiresAt);
 

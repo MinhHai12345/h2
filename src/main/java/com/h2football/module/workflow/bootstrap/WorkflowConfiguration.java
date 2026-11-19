@@ -1,5 +1,8 @@
 package com.h2football.module.workflow.bootstrap;
 
+import com.h2football.module.workflow.application.AnalyticsRefreshStageHandler;
+import com.h2football.module.workflow.application.DataReadinessStageHandler;
+import com.h2football.module.workflow.application.ModelEvaluationStageHandler;
 import com.h2football.module.workflow.application.SofaScoreSeasonIngestionStageHandler;
 import com.h2football.module.workflow.application.WorkflowDefinition;
 import com.h2football.module.workflow.application.WorkflowStageDefinition;
@@ -15,8 +18,16 @@ public class WorkflowConfiguration {
 
   @Bean
   WorkflowDefinition sofaScoreSeasonWorkflowDefinition(
-      SofaScoreSeasonIngestionStageHandler handler) {
+      SofaScoreSeasonIngestionStageHandler ingestion,
+      DataReadinessStageHandler readiness,
+      AnalyticsRefreshStageHandler analytics,
+      ModelEvaluationStageHandler evaluation) {
     return new WorkflowDefinition(
-        SOFASCORE_SEASON_SYNC, List.of(new WorkflowStageDefinition("SEASON_INGESTION", handler)));
+        SOFASCORE_SEASON_SYNC,
+        List.of(
+            new WorkflowStageDefinition("SEASON_INGESTION", ingestion),
+            new WorkflowStageDefinition("DATA_READINESS", readiness),
+            new WorkflowStageDefinition("ANALYTICS_REFRESH", analytics),
+            new WorkflowStageDefinition("MODEL_EVALUATION", evaluation)));
   }
 }

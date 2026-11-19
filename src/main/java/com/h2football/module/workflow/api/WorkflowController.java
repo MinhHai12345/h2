@@ -1,16 +1,15 @@
 package com.h2football.module.workflow.api;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.h2football.module.workflow.application.SofaScoreSeasonWorkflowRequest;
-import com.h2football.module.workflow.application.WorkflowCoordinator;
 import com.h2football.module.workflow.application.WorkflowRunQueryService;
-import com.h2football.module.workflow.bootstrap.WorkflowConfiguration;
+import com.h2football.module.workflow.application.WorkflowSubmissionService;
+import com.h2football.module.workflow.application.WorkflowSubmissionService.SeasonPipelineRequest;
 import com.h2football.module.workflow.domain.model.WorkflowRun;
 import com.h2football.module.workflow.domain.model.WorkflowStageExecution;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import java.time.Instant;
 import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -23,37 +22,38 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/workflows")
 public class WorkflowController {
-  private final WorkflowCoordinator coordinator;
+  private final WorkflowSubmissionService submissions;
   private final WorkflowRunQueryService queries;
-  private final ObjectMapper objectMapper;
 
   public WorkflowController(
-      WorkflowCoordinator coordinator, WorkflowRunQueryService queries, ObjectMapper objectMapper) {
-    this.coordinator = coordinator;
+      WorkflowSubmissionService submissions, WorkflowRunQueryService queries) {
+    this.submissions = submissions;
     this.queries = queries;
-    this.objectMapper = objectMapper;
   }
 
   @PostMapping("/sofascore-season-sync")
-  public WorkflowRunResponse start(@Valid @RequestBody StartSofaScoreSeasonRequest request)
-      throws JsonProcessingException {
+  public WorkflowRunResponse start(@Valid @RequestBody StartSofaScoreSeasonRequest request) {
     SofaScoreSeasonWorkflowRequest payload =
         new SofaScoreSeasonWorkflowRequest(
             request.idempotencyKey(),
             request.tournamentId(),
             request.sofaSeasonId(),
             request.canonicalSeasonId());
-    var run =
-        coordinator.start(
-            WorkflowConfiguration.SOFASCORE_SEASON_SYNC,
-            payload.idempotencyKey(),
-            objectMapper.writeValueAsString(payload));
+    var run = submissions.submit(payload);
     return WorkflowRunResponse.from(run, queries.findStages(run.getId()));
+  }
+
+  @PostMapping("/sofascore-season-pipelines")
+  public List<WorkflowRunResponse> startBatch(
+      @Valid @RequestBody StartSeasonPipelineBatchRequest request) {
+    return submissions.submitBatch(request.seasons()).stream()
+        .map(run -> WorkflowRunResponse.from(run, queries.findStages(run.getId())))
+        .toList();
   }
 
   @PostMapping("/{id}/resume")
   public WorkflowRunResponse resume(@PathVariable Long id) {
-    var run = coordinator.resume(id);
+    var run = submissions.resume(id);
     return WorkflowRunResponse.from(run, queries.findStages(run.getId()));
   }
 
@@ -68,6 +68,9 @@ public class WorkflowController {
       @Positive long tournamentId,
       @Positive long sofaSeasonId,
       @Positive long canonicalSeasonId) {}
+
+  public record StartSeasonPipelineBatchRequest(
+      @Size(min = 1, max = 50) List<@Valid SeasonPipelineRequest> seasons) {}
 
   public record WorkflowRunResponse(
       Long id,
