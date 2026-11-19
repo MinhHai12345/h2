@@ -6,6 +6,7 @@ import com.h2football.module.ingestion.application.SofaScoreMatchIngestionServic
 import com.h2football.module.ingestion.application.SofaScoreMatchLineupIngestionService;
 import com.h2football.module.ingestion.application.SofaScoreMatchStatisticsIngestionService;
 import com.h2football.module.ingestion.application.SofaScorePlayerMatchStatisticsIngestionService;
+import com.h2football.module.ingestion.application.SofaScoreSeasonMatchIngestionService;
 import com.h2football.module.provider.sofascore.model.SofaScoreEventWindow;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
@@ -20,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/v1/ingestion/sofascore")
 public class SofaScoreIngestionController {
   private final SofaScoreMasterDataIngestionService masterDataIngestion;
-  private final com.h2football.module.ingestion.application.SofaScoreSeasonMatchIngestionService seasonMatchIngestion;
+  private final SofaScoreSeasonMatchIngestionService seasonMatchIngestion;
   private final SofaScoreMatchIngestionService matchIngestion;
   private final SofaScoreMatchStatisticsIngestionService statisticsIngestion;
   private final SofaScoreMatchLineupIngestionService lineupIngestion;
@@ -32,7 +33,7 @@ public class SofaScoreIngestionController {
 
   public SofaScoreIngestionController(
       SofaScoreMasterDataIngestionService masterDataIngestion,
-      com.h2football.module.ingestion.application.SofaScoreSeasonMatchIngestionService seasonMatchIngestion,
+      SofaScoreSeasonMatchIngestionService seasonMatchIngestion,
       SofaScoreMatchIngestionService matchIngestion,
       SofaScoreMatchStatisticsIngestionService statisticsIngestion,
       SofaScoreMatchLineupIngestionService lineupIngestion,
