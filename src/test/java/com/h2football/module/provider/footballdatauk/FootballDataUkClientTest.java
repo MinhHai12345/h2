@@ -36,7 +36,7 @@ class FootballDataUkClientTest {
             "E0"))
         .thenReturn(content);
 
-    assertEquals("Date,HomeTeam,AwayTeam\\r\\n01/08/24,Arsenal,Chelsea", client.fetchSeasonCsv("e0", 2024));
+    assertEquals("Date,HomeTeam,AwayTeam\r\n01/08/24,Arsenal,Chelsea", client.fetchSeasonCsv("e0", 2024));
     verify(http)
         .getBytes(
             properties.getFootballDataUk().getBaseUrl(),
