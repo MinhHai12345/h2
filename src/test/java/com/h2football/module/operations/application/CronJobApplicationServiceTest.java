@@ -59,7 +59,7 @@ class CronJobApplicationServiceTest {
   }
 
   @Test
-  void rejectsUnknownJobClassBeforeRegistering() {
+  void rejectsUnknownJobClassBeforeRegistering() throws Exception {
     CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
 
     assertThrows(
