@@ -30,9 +30,24 @@ spring:
     locations: classpath:db/migration
     baseline-on-migrate: false
   quartz:
-    job-store-type: memory
-    auto-startup: false
+    job-store-type: jdbc
+    jdbc:
+      initialize-schema: never
+    auto-startup: true
     wait-for-jobs-to-complete-on-shutdown: true
+    overwrite-existing-jobs: false
+    properties:
+      org:
+        quartz:
+          scheduler:
+            instanceName: H2QuartzScheduler
+            instanceId: AUTO
+          jobStore:
+            driverDelegateClass: org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+            tablePrefix: QRTZ_
+            isClustered: ${QUARTZ_CLUSTERED:false}
+            clusterCheckinInterval: ${QUARTZ_CLUSTER_CHECKIN_INTERVAL:15000}
+            misfireThreshold: ${QUARTZ_MISFIRE_THRESHOLD:60000}
   jackson:
     time-zone: UTC
 
@@ -55,6 +70,11 @@ app:
   ingestion:
     operations:
       api-key: ${INGESTION_ADMIN_API_KEY:}
+    sofascore:
+      job:
+        enabled: ${SOFASCORE_INGESTION_JOB_ENABLED:false}
+        cron: ${SOFASCORE_INGESTION_JOB_CRON:0 15 2 * * ?}
+        seasons: []
   providers:
     sofascore:
       enabled: ${SOFASCORE_ENABLED:false}

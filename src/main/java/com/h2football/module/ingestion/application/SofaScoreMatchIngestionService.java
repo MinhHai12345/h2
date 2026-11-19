@@ -127,5 +127,7 @@ public class SofaScoreMatchIngestionService {
       int discoveredEvents,
       int createdMatches,
       int updatedMatches,
-      int skippedEvents, List<Long> eventIds, List<String> warnings) {}
+      int skippedEvents,
+      List<Long> eventIds,
+      List<String> warnings) {}
 }

@@ -33,8 +33,7 @@ class SofaScoreSeasonMatchIngestionServiceTest {
                   2, 2, 0, 0, List.of(1001L, 1002L), List.of()));
       when(matches.sync(17L, 52186L, 900L, window, 1))
           .thenReturn(
-              new SofaScoreMatchIngestionService.MatchSyncResult(
-                  0, 0, 0, 0, List.of(), List.of()));
+              new SofaScoreMatchIngestionService.MatchSyncResult(0, 0, 0, 0, List.of(), List.of()));
     }
 
     var result = service.sync(17L, 52186L, 900L);
@@ -44,7 +43,8 @@ class SofaScoreSeasonMatchIngestionServiceTest {
     assertThat(result.createdMatches()).isEqualTo(4);
     assertThat(result.uniqueEvents()).isEqualTo(2);
     assertThat(result.windows()).hasSize(2);
-    assertThat(result.windows()).allSatisfy(window -> assertThat(window.pageLimitReached()).isFalse());
+    assertThat(result.windows())
+        .allSatisfy(window -> assertThat(window.pageLimitReached()).isFalse());
   }
 
   @Test

@@ -66,6 +66,27 @@ The canonical season must already exist and must belong to the league mapped to 
 
 Match statistics, lineups, incidents and player match statistics remain available through their event-level synchronization endpoints. This season operation does not automatically request those detail endpoints, which can be expensive for large historical seasons.
 
+## Quartz scheduling
+
+Quartz follows the same separation used by MMO: the job is a thin adapter, while all ingestion work remains in `SofaScoreSeasonMatchIngestionService`. A startup initializer registers one job per configured tournament-season mapping. Jobs use `@DisallowConcurrentExecution`, run in UTC, and are refreshed when the application starts.
+
+Scheduling is opt-in. Example configuration:
+
+```yaml
+app:
+  ingestion:
+    sofascore:
+      job:
+        enabled: true
+        cron: "0 15 2 * * ?"
+        seasons:
+          - tournament-id: 17
+            sofa-season-id: 52186
+            canonical-season-id: 42
+```
+
+Environment variables `SOFASCORE_INGESTION_JOB_ENABLED` and `SOFASCORE_INGESTION_JOB_CRON` control activation and cadence. The season mapping list must be supplied in application configuration. The scheduler uses Quartz JDBC tables managed by Flyway, while the `cron_jobs` table is the application-facing job registry. Definitions and their season parameters survive restarts. The secured Cron Job Management API supports listing, pause, resume, stop, immediate start, schedule updates and deletion.
+
 ## Idempotency
 
 Canonical records are reused by their natural key when possible:
@@ -81,7 +102,7 @@ SofaScore's tournament season catalogue supplies season ID, name/year and curren
 
 ## Current limitations
 
-- This is an on-demand API workflow; Quartz scheduling is intentionally deferred until the manual ingestion path is verified.
+- Season-level synchronization can run as a Quartz cron job. Scheduling is disabled by default and requires explicit season identifiers in configuration.
 - Team discovery currently uses standings only.
 - Understat, football-data and football-data.uk providers are not enabled by this implementation.
 - No compilation or tests are claimed until the final verification stage.

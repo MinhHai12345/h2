@@ -8,8 +8,8 @@ import java.util.Set;
 import org.springframework.stereotype.Service;
 
 /**
- * Coordinates the prerequisite team import and complete event-page traversal for one
- * SofaScore tournament season.
+ * Coordinates the prerequisite team import and complete event-page traversal for one SofaScore
+ * tournament season.
  */
 @Service
 public class SofaScoreSeasonMatchIngestionService {
@@ -19,19 +19,18 @@ public class SofaScoreSeasonMatchIngestionService {
   private final SofaScoreMatchIngestionService matches;
 
   public SofaScoreSeasonMatchIngestionService(
-      SofaScoreMasterDataIngestionService masterData,
-      SofaScoreMatchIngestionService matches) {
+      SofaScoreMasterDataIngestionService masterData, SofaScoreMatchIngestionService matches) {
     this.masterData = masterData;
     this.matches = matches;
   }
 
-  public SeasonMatchSyncResult sync(
-      long tournamentId, long sofaSeasonId, long canonicalSeasonId) {
+  public SeasonMatchSyncResult sync(long tournamentId, long sofaSeasonId, long canonicalSeasonId) {
     if (tournamentId <= 0 || sofaSeasonId <= 0 || canonicalSeasonId <= 0) {
       throw new IllegalArgumentException("All season identifiers must be positive");
     }
 
     var teams = masterData.syncTeams(tournamentId, sofaSeasonId);
+    ensureNotInterrupted();
     List<WindowSyncResult> windows = new ArrayList<>();
     Set<Long> eventIds = new LinkedHashSet<>();
 
@@ -44,8 +43,8 @@ public class SofaScoreSeasonMatchIngestionService {
       boolean exhausted = false;
 
       for (int page = 0; page < MAX_PAGES_PER_WINDOW; page++) {
-        var result =
-            matches.sync(tournamentId, sofaSeasonId, canonicalSeasonId, window, page);
+        ensureNotInterrupted();
+        var result = matches.sync(tournamentId, sofaSeasonId, canonicalSeasonId, window, page);
         if (result.discoveredEvents() == 0) {
           exhausted = true;
           break;
@@ -60,8 +59,11 @@ public class SofaScoreSeasonMatchIngestionService {
 
       if (!exhausted) {
         warnings.add(
-            "Stopped " + window.pathSegment() + " event traversal after "
-                + MAX_PAGES_PER_WINDOW + " pages to protect the ingestion process.");
+            "Stopped "
+                + window.pathSegment()
+                + " event traversal after "
+                + MAX_PAGES_PER_WINDOW
+                + " pages to protect the ingestion process.");
       }
       windows.add(
           new WindowSyncResult(
@@ -87,6 +89,12 @@ public class SofaScoreSeasonMatchIngestionService {
         eventIds.size(),
         List.copyOf(windows),
         List.copyOf(warnings));
+  }
+
+  private void ensureNotInterrupted() {
+    if (Thread.currentThread().isInterrupted()) {
+      throw new IllegalStateException("SofaScore season synchronization was interrupted");
+    }
   }
 
   public record WindowSyncResult(
