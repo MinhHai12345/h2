@@ -69,7 +69,15 @@ public class SofaScoreMatchIngestionService {
     int created = 0;
     int updated = 0;
     int skipped = 0;
+    List<Long> eventIds = new ArrayList<>();
     for (SofaScoreEventSnapshot event : events) {
+      try {
+        eventIds.add(Long.parseLong(event.externalId()));
+      } catch (NumberFormatException ignored) {
+        warnings.add("Skipped invalid SofaScore event identifier: " + event.externalId());
+        skipped++;
+        continue;
+      }
       Optional<Long> homeTeamId =
           identities.findCanonicalId(ResourceType.TEAM, PROVIDER, event.homeTeamExternalId());
       Optional<Long> awayTeamId =
@@ -97,7 +105,8 @@ public class SofaScoreMatchIngestionService {
       if (inserted) created++;
       else updated++;
     }
-    return new MatchSyncResult(events.size(), created, updated, skipped, List.copyOf(warnings));
+    return new MatchSyncResult(
+        events.size(), created, updated, skipped, List.copyOf(eventIds), List.copyOf(warnings));
   }
 
   private MatchStatus normalizeStatus(String statusCode) {
@@ -118,6 +127,5 @@ public class SofaScoreMatchIngestionService {
       int discoveredEvents,
       int createdMatches,
       int updatedMatches,
-      int skippedEvents,
-      List<String> warnings) {}
+      int skippedEvents, List<Long> eventIds, List<String> warnings) {}
 }
