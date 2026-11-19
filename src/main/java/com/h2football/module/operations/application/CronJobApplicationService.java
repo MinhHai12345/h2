@@ -1,11 +1,11 @@
 package com.h2football.module.operations.application;
 
-import com.h2football.module.operations.domain.model.CronJob;
-import com.h2football.module.operations.domain.model.CronJobStatus;
-import com.h2football.module.operations.domain.repository.CronJobRepository;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.h2football.module.operations.domain.model.CronJob;
+import com.h2football.module.operations.domain.model.CronJobStatus;
+import com.h2football.module.operations.domain.repository.CronJobRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -62,7 +62,11 @@ public class CronJobApplicationService {
 
   @Transactional
   public CronJob registerOrUpdate(
-      String name, String group, String jobClass, String cronExpression, String description,
+      String name,
+      String group,
+      String jobClass,
+      String cronExpression,
+      String description,
       JobDataMap jobData) {
     validateDefinition(name, group, jobClass, cronExpression);
     CronJob job =
@@ -179,16 +183,17 @@ public class CronJobApplicationService {
   public void pauseGroup(String group) {
     repository.findAll().stream()
         .filter(job -> job.getJobGroup().equals(group))
-        .forEach(job -> {
-          try {
-            scheduler.pauseJob(key(job));
-            job.markPaused();
-            repository.save(job);
-          } catch (SchedulerException exception) {
-            throw new CronJobOperationException(
-                "Unable to pause cron job " + job.getJobName(), exception);
-          }
-        });
+        .forEach(
+            job -> {
+              try {
+                scheduler.pauseJob(key(job));
+                job.markPaused();
+                repository.save(job);
+              } catch (SchedulerException exception) {
+                throw new CronJobOperationException(
+                    "Unable to pause cron job " + job.getJobName(), exception);
+              }
+            });
   }
 
   @Transactional
@@ -240,7 +245,8 @@ public class CronJobApplicationService {
         repository.save(job);
       }
     } catch (SchedulerException exception) {
-      throw new CronJobOperationException("Unable to register cron job " + job.getJobName(), exception);
+      throw new CronJobOperationException(
+          "Unable to register cron job " + job.getJobName(), exception);
     }
   }
 
