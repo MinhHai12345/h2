@@ -51,12 +51,16 @@ public class SofaScoreMatchDetailIngestionService {
     int playerStatisticsSucceeded = 0;
     int skippedPlayerStatistics = 0;
     List<String> failures = new ArrayList<>();
-
-    for (Long eventId : new TreeSet<>(eventIds)) {
+    Set<Long> orderedEventIds = new TreeSet<>();
+    for (Long eventId : eventIds) {
       if (eventId == null || eventId <= 0) {
         failures.add("Invalid SofaScore event identifier: " + eventId);
-        continue;
+      } else {
+        orderedEventIds.add(eventId);
       }
+    }
+
+    for (Long eventId : orderedEventIds) {
       ensureNotInterrupted();
 
       if (executeWithRetry("statistics", eventId, () -> statistics.sync(eventId), failures)) {
@@ -88,7 +92,7 @@ public class SofaScoreMatchDetailIngestionService {
 
     DetailSyncResult result =
         new DetailSyncResult(
-            eventIds.size(),
+            orderedEventIds.size(),
             statisticsSucceeded,
             lineupsSucceeded,
             incidentsSucceeded,
@@ -110,7 +114,7 @@ public class SofaScoreMatchDetailIngestionService {
   private boolean executeWithRetry(
       String task, long eventId, Supplier<?> operation, List<String> failures) {
     var retry = properties.getMatchDetails();
-    int maxAttempts = Math.max(1, retry.getRetryAttempts());
+    int maxAttempts = Math.max(1, Math.min(10, retry.getRetryAttempts()));
     for (int attempt = 1; attempt <= maxAttempts; attempt++) {
       ensureNotInterrupted();
       try {
@@ -139,7 +143,8 @@ public class SofaScoreMatchDetailIngestionService {
           log.error(message, exception);
           return false;
         }
-        long delay = Math.max(0, retry.getRetryDelayMillis()) * attempt;
+        long baseDelay = Math.max(0, Math.min(60_000L, retry.getRetryDelayMillis()));
+        long delay = baseDelay * attempt;
         log.warn(
             "SofaScore {} ingestion failed for event {} on attempt {}/{}; retrying in {} ms",
             task,
