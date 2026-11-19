@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import com.h2football.module.operations.domain.model.CronJob;
 import com.h2football.module.operations.domain.model.CronJobStatus;
 import com.h2football.module.operations.domain.repository.CronJobRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -34,7 +35,7 @@ class CronJobApplicationServiceTest {
     when(repository.save(any(CronJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(scheduler.checkExists(any(org.quartz.JobKey.class))).thenReturn(false);
 
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository);
+    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
     JobDataMap data = new JobDataMap();
     data.put("tournamentId", 17L);
     data.put("sofaSeasonId", 52186L);
