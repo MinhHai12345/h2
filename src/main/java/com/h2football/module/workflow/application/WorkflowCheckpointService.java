@@ -9,7 +9,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,15 +27,9 @@ public class WorkflowCheckpointService {
 
   @Transactional
   public WorkflowRun createOrLoad(String type, String key, String payload) {
+    runs.insertIfAbsent(type, key, payload);
     return runs.findByWorkflowTypeAndIdempotencyKey(type, key)
-        .orElseGet(
-            () -> {
-              try {
-                return runs.saveAndFlush(new WorkflowRun(type, key, payload, Instant.now(clock)));
-              } catch (DataIntegrityViolationException exception) {
-                return runs.findByWorkflowTypeAndIdempotencyKey(type, key).orElseThrow(() -> exception);
-              }
-            });
+        .orElseThrow(() -> new IllegalStateException("Workflow run could not be created or loaded"));
   }
 
   @Transactional
@@ -91,7 +84,8 @@ public class WorkflowCheckpointService {
 
   @Transactional(readOnly = true)
   public WorkflowRun getRun(Long runId) {
-    return runs.findById(runId).orElseThrow(() -> new IllegalArgumentException("Workflow run not found: " + runId));
+    return runs.findById(runId)
+        .orElseThrow(() -> new IllegalArgumentException("Workflow run not found: " + runId));
   }
 
   @Transactional(readOnly = true)
