@@ -2,6 +2,9 @@ package com.h2football.module.provider;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.h2football.module.identity.domain.model.Provider;
+import com.h2football.module.provider.footballdata.FootballDataClient;
+import com.h2football.module.provider.footballdatauk.FootballDataUkClient;
+import com.h2football.module.provider.understat.UnderstatClient;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
@@ -13,10 +16,8 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.reactive.function.client.WebClient;
 
 @Component
 public class MultiProviderSeasonDataClient {
@@ -25,14 +26,17 @@ public class MultiProviderSeasonDataClient {
       DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
   private static final ZoneId UK_ZONE = ZoneId.of("Europe/London");
 
-  private final WebClient.Builder webClientBuilder;
-  private final ProviderIngestionProperties properties;
-  private long nextFootballDataRequestAtMillis;
+  private final UnderstatClient understatClient;
+  private final FootballDataClient footballDataClient;
+  private final FootballDataUkClient footballDataUkClient;
 
   public MultiProviderSeasonDataClient(
-      WebClient.Builder webClientBuilder, ProviderIngestionProperties properties) {
-    this.webClientBuilder = webClientBuilder;
-    this.properties = properties;
+      UnderstatClient understatClient,
+      FootballDataClient footballDataClient,
+      FootballDataUkClient footballDataUkClient) {
+    this.understatClient = understatClient;
+    this.footballDataClient = footballDataClient;
+    this.footballDataUkClient = footballDataUkClient;
   }
 
   public List<ProviderMatchRecord> fetch(
@@ -46,36 +50,8 @@ public class MultiProviderSeasonDataClient {
     };
   }
 
-  private synchronized List<ProviderMatchRecord> fetchFootballData(
-      String competition, int seasonYear) {
-    var config = properties.getFootballData();
-    if (!config.isEnabled()) throw new IllegalStateException("Football-Data provider is disabled");
-    if (!StringUtils.hasText(config.getApiKey())) {
-      throw new IllegalStateException("FOOTBALL_DATA_API_KEY is required");
-    }
-    awaitFootballDataRequestSlot();
-    JsonNode root;
-    try {
-      root =
-          webClientBuilder
-              .baseUrl(config.getBaseUrl())
-              .defaultHeader("X-Auth-Token", config.getApiKey())
-              .defaultHeader(HttpHeaders.ACCEPT, "application/json")
-              .build()
-              .get()
-              .uri(
-                  uri ->
-                      uri.path("/competitions/{code}/matches")
-                          .queryParam("season", seasonYear)
-                          .build(competition))
-              .retrieve()
-              .bodyToMono(JsonNode.class)
-              .block();
-    } catch (RuntimeException exception) {
-      nextFootballDataRequestAtMillis = System.currentTimeMillis() + 6_000;
-      throw exception;
-    }
-    nextFootballDataRequestAtMillis = System.currentTimeMillis() + 6_000;
+  private List<ProviderMatchRecord> fetchFootballData(String competition, int seasonYear) {
+    JsonNode root = footballDataClient.fetchCompetitionMatches(competition, seasonYear);
     List<ProviderMatchRecord> records = new ArrayList<>();
     JsonNode matches = root == null ? null : root.path("matches");
     if (matches != null && matches.isArray()) {
@@ -102,89 +78,48 @@ public class MultiProviderSeasonDataClient {
     return List.copyOf(records);
   }
 
-  private void awaitFootballDataRequestSlot() {
-    long waitMillis = nextFootballDataRequestAtMillis - System.currentTimeMillis();
-    if (waitMillis <= 0) return;
-    try {
-      Thread.sleep(waitMillis);
-    } catch (InterruptedException exception) {
-      Thread.currentThread().interrupt();
-      throw new IllegalStateException(
-          "Interrupted while waiting for football-data.org request slot", exception);
-    }
-  }
-
   private List<ProviderMatchRecord> fetchUnderstat(String league, int seasonYear) {
-    var config = properties.getUnderstat();
-    if (!config.isEnabled()) throw new IllegalStateException("Understat provider is disabled");
-    JsonNode root =
-        webClientBuilder
-            .baseUrl(config.getBaseUrl())
-            .defaultHeader(
-                HttpHeaders.REFERER, config.getBaseUrl() + "/league/" + league + "/" + seasonYear)
-            .defaultHeader("X-Requested-With", "XMLHttpRequest")
-            .build()
-            .get()
-            .uri("/getLeagueData/{league}/{season}", league, seasonYear)
-            .retrieve()
-            .bodyToMono(JsonNode.class)
-            .block();
+    JsonNode root = understatClient.fetchLeagueData(league, seasonYear);
     List<ProviderMatchRecord> records = new ArrayList<>();
     JsonNode dates = root == null ? null : root.path("dates");
     if (dates != null && dates.isArray()) {
       for (JsonNode match : dates) {
         JsonNode goals = match.path("goals");
-        String matchId = text(match, "id");
-        String homeId = text(match, "h");
-        String awayId = text(match, "a");
-        String homeName = text(match, "home_team");
-        String awayName = text(match, "away_team");
-        String date = text(match, "datetime");
         JsonNode xg = match.path("xG");
-        BigDecimal homeXg = decimal(xg, "h");
-        BigDecimal awayXg = decimal(xg, "a");
         Integer homeScore = nullableInteger(goals, "h");
         Integer awayScore = nullableInteger(goals, "a");
         boolean finished =
             match.path("isResult").asBoolean(false) || (homeScore != null && awayScore != null);
         records.add(
             new ProviderMatchRecord(
-                matchId,
-                homeId,
-                homeName,
-                awayId,
-                awayName,
-                instant(date, UNDERSTAT_DATE),
+                text(match, "id"),
+                text(match, "h"),
+                text(match, "home_team"),
+                text(match, "a"),
+                text(match, "away_team"),
+                instant(text(match, "datetime"), UNDERSTAT_DATE),
                 finished ? "FINISHED" : "SCHEDULED",
                 homeScore,
                 awayScore,
                 text(match, "round"),
-                homeXg,
-                awayXg));
+                decimal(xg, "h"),
+                decimal(xg, "a")));
       }
     }
     return List.copyOf(records);
   }
 
   private List<ProviderMatchRecord> fetchFootballDataUk(String leagueCode, int seasonYear) {
-    var config = properties.getFootballDataUk();
-    if (!config.isEnabled()) {
-      throw new IllegalStateException("Football-Data UK provider is disabled");
-    }
     String seasonCode =
         String.format(Locale.ROOT, "%02d%02d", seasonYear % 100, (seasonYear + 1) % 100);
-    String csv =
-        webClientBuilder
-            .baseUrl(config.getBaseUrl())
-            .build()
-            .get()
-            .uri("/mmz4281/{season}/{league}.csv", seasonCode, leagueCode.toUpperCase(Locale.ROOT))
-            .retrieve()
-            .bodyToMono(String.class)
-            .block();
-    if (!StringUtils.hasText(csv)) return List.of();
+    String csv = footballDataUkClient.fetchSeasonCsv(leagueCode, seasonYear);
+    if (!StringUtils.hasText(csv)) {
+      return List.of();
+    }
     List<List<String>> rows = parseCsv(csv);
-    if (rows.isEmpty()) return List.of();
+    if (rows.isEmpty()) {
+      return List.of();
+    }
     List<String> header =
         rows.get(0).stream()
             .map(
@@ -261,17 +196,23 @@ public class MultiProviderSeasonDataClient {
         row.add(field.toString().trim());
         field.setLength(0);
       } else if ((current == '\n' || current == '\r') && !quoted) {
-        if (current == '\r' && i + 1 < csv.length() && csv.charAt(i + 1) == '\n') i++;
+        if (current == '\r' && i + 1 < csv.length() && csv.charAt(i + 1) == '\n') {
+          i++;
+        }
         row.add(field.toString().trim());
         field.setLength(0);
-        if (row.stream().anyMatch(StringUtils::hasText)) rows.add(List.copyOf(row));
+        if (row.stream().anyMatch(StringUtils::hasText)) {
+          rows.add(List.copyOf(row));
+        }
         row.clear();
       } else {
         field.append(current);
       }
     }
     row.add(field.toString().trim());
-    if (row.stream().anyMatch(StringUtils::hasText)) rows.add(List.copyOf(row));
+    if (row.stream().anyMatch(StringUtils::hasText)) {
+      rows.add(List.copyOf(row));
+    }
     return rows;
   }
 
@@ -299,7 +240,9 @@ public class MultiProviderSeasonDataClient {
   }
 
   private static BigDecimal decimal(String value) {
-    if (!StringUtils.hasText(value) || "-".equals(value)) return null;
+    if (!StringUtils.hasText(value) || "-".equals(value)) {
+      return null;
+    }
     try {
       BigDecimal result = new BigDecimal(value.trim());
       return result.signum() >= 0 ? result : null;
@@ -309,7 +252,9 @@ public class MultiProviderSeasonDataClient {
   }
 
   private static Integer parseInteger(String value) {
-    if (!StringUtils.hasText(value) || "-".equals(value)) return null;
+    if (!StringUtils.hasText(value) || "-".equals(value)) {
+      return null;
+    }
     try {
       return Integer.valueOf(value.trim());
     } catch (NumberFormatException exception) {
@@ -318,9 +263,13 @@ public class MultiProviderSeasonDataClient {
   }
 
   private static Instant instant(String value, DateTimeFormatter formatter) {
-    if (!StringUtils.hasText(value)) return Instant.EPOCH;
+    if (!StringUtils.hasText(value)) {
+      return Instant.EPOCH;
+    }
     try {
-      if (formatter == null) return Instant.parse(value);
+      if (formatter == null) {
+        return Instant.parse(value);
+      }
       return LocalDateTime.parse(value, formatter).toInstant(ZoneOffset.UTC);
     } catch (RuntimeException exception) {
       return Instant.EPOCH;
