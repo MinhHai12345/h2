@@ -248,7 +248,6 @@ public class ProviderSeasonPersistenceService {
     };
   }
 
-
   public record ProviderSeasonSyncResult(
       Provider provider,
       long seasonId,

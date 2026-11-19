@@ -1,10 +1,10 @@
 package com.h2football.module.provider.sofascore.mapper;
 
 import com.h2football.module.provider.sofascore.dto.SofaScoreDtos;
-import com.h2football.module.provider.standardization.ProviderDataStandardizer;
 import com.h2football.module.provider.sofascore.model.SofaScoreLeagueSnapshot;
 import com.h2football.module.provider.sofascore.model.SofaScoreSeasonSnapshot;
 import com.h2football.module.provider.sofascore.model.SofaScoreTeamSnapshot;
+import com.h2football.module.provider.standardization.ProviderDataStandardizer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -33,7 +33,11 @@ public class SofaScoreMasterDataMapper {
       }
     }
     return new SofaScoreLeagueSnapshot(
-        tournament.id().toString(), ProviderDataStandardizer.leagueName(tournament.name()), isoCode, countryName, seasons);
+        tournament.id().toString(),
+        ProviderDataStandardizer.leagueName(tournament.name()),
+        isoCode,
+        countryName,
+        seasons);
   }
 
   public SofaScoreSeasonSnapshot toSeasonSnapshot(SofaScoreDtos.Season season) {
@@ -54,7 +58,10 @@ public class SofaScoreMasterDataMapper {
     String isoCode = team.country() == null ? null : normalizeIsoCode(team.country().alpha2());
     String countryName = team.country() == null ? null : clean(team.country().name());
     return new SofaScoreTeamSnapshot(
-        team.id().toString(), ProviderDataStandardizer.teamName(team.name()), isoCode, countryName);
+        team.id().toString(),
+        ProviderDataStandardizer.teamName(team.name()),
+        isoCode,
+        countryName);
   }
 
   public static String canonicalStartYear(String label) {

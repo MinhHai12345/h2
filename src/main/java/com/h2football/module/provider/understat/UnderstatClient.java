@@ -25,7 +25,9 @@ public class UnderstatClient {
     if (!config.isEnabled()) {
       throw new IllegalStateException("Understat provider is disabled");
     }
-    if (!StringUtils.hasText(leagueSlug) || leagueSlug.contains("/") || leagueSlug.contains("..")) {
+    if (!StringUtils.hasText(leagueSlug)
+        || leagueSlug.contains("/")
+        || leagueSlug.contains("..")) {
       throw new IllegalArgumentException("A valid Understat league slug is required");
     }
     if (seasonYear < 2014) {
