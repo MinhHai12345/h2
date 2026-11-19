@@ -31,7 +31,7 @@ spring:
     baseline-on-migrate: false
   quartz:
     job-store-type: memory
-    auto-startup: false
+    auto-startup: true
     wait-for-jobs-to-complete-on-shutdown: true
   jackson:
     time-zone: UTC
@@ -55,6 +55,11 @@ app:
   ingestion:
     operations:
       api-key: ${INGESTION_ADMIN_API_KEY:}
+    sofascore:
+      job:
+        enabled: ${SOFASCORE_INGESTION_JOB_ENABLED:false}
+        cron: ${SOFASCORE_INGESTION_JOB_CRON:0 15 2 * * ?}
+        seasons: []
   providers:
     sofascore:
       enabled: ${SOFASCORE_ENABLED:false}
