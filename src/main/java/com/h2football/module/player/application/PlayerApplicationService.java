@@ -53,9 +53,6 @@ public class PlayerApplicationService {
     return canonical.getId();
   }
 
-  private String normalizeCountryCode(String value) {
-    return value == null || value.isBlank() ? null : value.trim().toUpperCase(java.util.Locale.ROOT);
-  }
 
   public record PlayerInput(
       String name,
