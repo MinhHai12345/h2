@@ -53,8 +53,7 @@ public class MatchAnalyticsCalculator {
         || combinedCoveragePercent.compareTo(HUNDRED) > 0) {
       throw new IllegalArgumentException("combinedCoveragePercent must be between 0 and 100");
     }
-    BigDecimal coverage =
-        combinedCoveragePercent.divide(HUNDRED, SCALE, RoundingMode.HALF_UP);
+    BigDecimal coverage = combinedCoveragePercent.divide(HUNDRED, SCALE, RoundingMode.HALF_UP);
     BigDecimal relativeStrength = teamAttackingIndex.subtract(opponentDefensiveIndex);
     BigDecimal adjustment =
         ONE.add(PLAYER_IMPACT_ADJUSTMENT_LIMIT.multiply(relativeStrength).multiply(coverage));

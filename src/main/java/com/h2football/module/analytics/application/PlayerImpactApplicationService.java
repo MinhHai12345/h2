@@ -123,8 +123,7 @@ public class PlayerImpactApplicationService {
             .map(PlayerImpactResponse::impactScore)
             .filter(java.util.Objects::nonNull)
             .toList();
-    BigDecimal average =
-        average(availableScores);
+    BigDecimal average = average(availableScores);
     BigDecimal coverage =
         players.isEmpty()
             ? BigDecimal.ZERO.setScale(SCALE)
@@ -149,10 +148,7 @@ public class PlayerImpactApplicationService {
       List<PlayerImpactResponse> players,
       Function<PlayerImpactResponse, BigDecimal> componentExtractor) {
     return average(
-        players.stream()
-            .map(componentExtractor)
-            .filter(java.util.Objects::nonNull)
-            .toList());
+        players.stream().map(componentExtractor).filter(java.util.Objects::nonNull).toList());
   }
 
   private BigDecimal average(List<BigDecimal> values) {

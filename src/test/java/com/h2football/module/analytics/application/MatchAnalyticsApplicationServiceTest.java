@@ -80,9 +80,15 @@ class MatchAnalyticsApplicationServiceTest {
             .findAllByMatchIdInAndProviderOrderByMatchIdAscPeriodAscGroupNameAscStatisticKeyAsc(
                 List.of(1L, 2L), Provider.SOFASCORE))
         .thenReturn(historicalStatistics);
-    when(playerImpact.calculate(100L, Provider.SOFASCORE)).thenReturn(impact(
-        new BigDecimal("0.70"), new BigDecimal("0.20"), new BigDecimal("100"),
-        new BigDecimal("0.30"), new BigDecimal("0.60"), new BigDecimal("100")));
+    when(playerImpact.calculate(100L, Provider.SOFASCORE))
+        .thenReturn(
+            impact(
+                new BigDecimal("0.70"),
+                new BigDecimal("0.20"),
+                new BigDecimal("100"),
+                new BigDecimal("0.30"),
+                new BigDecimal("0.60"),
+                new BigDecimal("100")));
 
     MatchAnalytics result = service.rebuild(100L, Provider.SOFASCORE);
 
@@ -151,11 +157,7 @@ class MatchAnalyticsApplicationServiceTest {
   }
 
   private TeamImpact teamImpact(
-      Long teamId,
-      String teamName,
-      BigDecimal attack,
-      BigDecimal defense,
-      BigDecimal coverage) {
+      Long teamId, String teamName, BigDecimal attack, BigDecimal defense, BigDecimal coverage) {
     return new TeamImpact(
         teamId,
         teamName,
