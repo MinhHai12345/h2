@@ -17,7 +17,6 @@ import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.TriggerBuilder;
 import org.quartz.TriggerKey;
-import org.quartz.impl.matchers.GroupMatcher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,7 +24,6 @@ import org.springframework.transaction.annotation.Transactional;
 public class CronJobApplicationService {
   private static final Set<String> ALLOWED_JOB_CLASSES =
       Set.of("com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob");
-  private static final String DEFAULT_GROUP = "sofascore-ingestion";
   private static final Set<String> TRIGGER_PARAMETERS =
       Set.of("tournamentId", "sofaSeasonId", "canonicalSeasonId");
 
@@ -69,7 +67,12 @@ public class CronJobApplicationService {
     JobKey key = key(job);
     try {
       Trigger trigger = buildTrigger(job, cronExpression);
-      scheduler.rescheduleJob(triggerKey(job), trigger);
+      if (scheduler.checkExists(triggerKey(job))) {
+        scheduler.rescheduleJob(triggerKey(job), trigger);
+      } else {
+        ensureScheduled(job);
+        scheduler.scheduleJob(trigger);
+      }
       job.updateDefinition(job.getJobClass(), cronExpression, job.getDescription());
       if (job.getStatus() != CronJobStatus.PAUSED) {
         job.markScheduled();
@@ -124,9 +127,16 @@ public class CronJobApplicationService {
     }
     try {
       ensureScheduled(job);
-      scheduler.triggerJob(key(job), triggerData);
       job.markRunning();
-      return repository.save(job);
+      repository.save(job);
+      try {
+        scheduler.triggerJob(key(job), triggerData);
+      } catch (SchedulerException triggerFailure) {
+        job.markScheduled();
+        repository.save(job);
+        throw triggerFailure;
+      }
+      return job;
     } catch (SchedulerException exception) {
       throw new CronJobOperationException("Unable to trigger cron job " + id, exception);
     }
