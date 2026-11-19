@@ -7,10 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.h2football.module.operations.domain.model.CronJob;
 import com.h2football.module.operations.domain.model.CronJobStatus;
 import com.h2football.module.operations.domain.repository.CronJobRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.Map;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -35,7 +35,8 @@ class CronJobApplicationServiceTest {
     when(repository.save(any(CronJob.class))).thenAnswer(invocation -> invocation.getArgument(0));
     when(scheduler.checkExists(any(org.quartz.JobKey.class))).thenReturn(false);
 
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
+    CronJobApplicationService service =
+        new CronJobApplicationService(scheduler, repository, new ObjectMapper());
     JobDataMap data = new JobDataMap();
     data.put("tournamentId", 17L);
     data.put("sofaSeasonId", 52186L);
@@ -60,7 +61,8 @@ class CronJobApplicationServiceTest {
 
   @Test
   void rejectsUnknownJobClassBeforeRegistering() throws Exception {
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
+    CronJobApplicationService service =
+        new CronJobApplicationService(scheduler, repository, new ObjectMapper());
 
     assertThrows(
         IllegalArgumentException.class,
@@ -78,7 +80,8 @@ class CronJobApplicationServiceTest {
 
   @Test
   void rejectsInvalidCronExpression() {
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
+    CronJobApplicationService service =
+        new CronJobApplicationService(scheduler, repository, new ObjectMapper());
 
     assertThrows(
         IllegalArgumentException.class,
@@ -106,7 +109,8 @@ class CronJobApplicationServiceTest {
     job.markPaused();
     when(repository.findById(7L)).thenReturn(Optional.of(job));
 
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
+    CronJobApplicationService service =
+        new CronJobApplicationService(scheduler, repository, new ObjectMapper());
 
     assertThrows(CronJobOperationException.class, () -> service.triggerNow(7L, Map.of()));
     verify(scheduler, never()).triggerJob(any(org.quartz.JobKey.class), any(JobDataMap.class));
