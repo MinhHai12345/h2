@@ -19,6 +19,16 @@ class SofaScoreIngestionJobPropertiesTest {
     assertThat(properties.getLeagueCatalogue().isRunOnStartup()).isFalse();
   }
 
+
+  @Test
+  void shouldProvideBoundedRetryDefaultsForMatchDetailStreams() {
+    SofaScoreIngestionJobProperties properties = new SofaScoreIngestionJobProperties();
+
+    assertThat(properties.getMatchDetails().isEnabled()).isFalse();
+    assertThat(properties.getMatchDetails().getRetryAttempts()).isEqualTo(3);
+    assertThat(properties.getMatchDetails().getRetryDelayMillis()).isEqualTo(1000L);
+  }
+
   @Test
   void shouldDefensivelyCopyConfiguredTournamentIds() {
     SofaScoreIngestionJobProperties properties = new SofaScoreIngestionJobProperties();
