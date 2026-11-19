@@ -97,7 +97,9 @@ public class CronJob {
   public void markPaused() { this.status = CronJobStatus.PAUSED; }
 
   public void recordExecution(CronJobExecutionStatus executionStatus, String message, Instant executedAt) {
-    this.status = CronJobStatus.SCHEDULED;
+    if (this.status != CronJobStatus.PAUSED) {
+      this.status = CronJobStatus.SCHEDULED;
+    }
     this.lastExecutionStatus = executionStatus;
     this.lastExecutionMessage = message;
     this.lastExecutedAt = executedAt;
