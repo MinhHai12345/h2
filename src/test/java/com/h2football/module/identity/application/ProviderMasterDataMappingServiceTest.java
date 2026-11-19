@@ -40,8 +40,7 @@ class ProviderMasterDataMappingServiceTest {
   void rejectsMappingWhenCanonicalEntityDoesNotExist() {
     when(players.existsById(999L)).thenReturn(false);
 
-    assertThatThrownBy(
-            () -> service.map(Provider.UNDERSTAT, ResourceType.PLAYER, "player-9", 999L))
+    assertThatThrownBy(() -> service.map(Provider.UNDERSTAT, ResourceType.PLAYER, "player-9", 999L))
         .isInstanceOf(
             com.h2football.module.masterdata.application.MasterDataNotFoundException.class);
 
@@ -50,8 +49,7 @@ class ProviderMasterDataMappingServiceTest {
 
   @Test
   void rejectsUnsupportedResourceTypes() {
-    assertThatThrownBy(
-            () -> service.map(Provider.SOFASCORE, ResourceType.MATCH, "match-1", 1L))
+    assertThatThrownBy(() -> service.map(Provider.SOFASCORE, ResourceType.MATCH, "match-1", 1L))
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessageContaining("Only LEAGUE");
   }

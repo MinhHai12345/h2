@@ -41,14 +41,17 @@ public class MasterDataReconciliationService {
 
   public List<ReconciliationCandidate> findCandidates(ResourceType resourceType) {
     if (resourceType != null && !supported(resourceType)) {
-      throw new IllegalArgumentException(
-          "Reconciliation supports LEAGUE, SEASON, TEAM and PLAYER");
+      throw new IllegalArgumentException("Reconciliation supports LEAGUE, SEASON, TEAM and PLAYER");
     }
     List<ReconciliationCandidate> result = new ArrayList<>();
-    if (resourceType == null || resourceType == ResourceType.LEAGUE) result.addAll(leagueCandidates());
-    if (resourceType == null || resourceType == ResourceType.SEASON) result.addAll(seasonCandidates());
-    if (resourceType == null || resourceType == ResourceType.TEAM) result.addAll(teamCandidates());
-    if (resourceType == null || resourceType == ResourceType.PLAYER) result.addAll(playerCandidates());
+    if (resourceType == null || resourceType == ResourceType.LEAGUE)
+      result.addAll(leagueCandidates());
+    if (resourceType == null || resourceType == ResourceType.SEASON)
+      result.addAll(seasonCandidates());
+    if (resourceType == null || resourceType == ResourceType.TEAM)
+      result.addAll(teamCandidates());
+    if (resourceType == null || resourceType == ResourceType.PLAYER)
+      result.addAll(playerCandidates());
     return result.stream()
         .sorted(Comparator.comparing(item -> item.resourceType().name() + item.matchKey()))
         .toList();
@@ -58,9 +61,13 @@ public class MasterDataReconciliationService {
     Map<String, List<EntityReference>> groups = new TreeMap<>();
     for (League item : leagues.findAll()) {
       String key =
-          item.getCountry().getId() + "|"
+          item.getCountry().getId()
+              + "|"
               + ProviderDataStandardizer.leagueMatchKey(item.getName());
-      add(groups, key, new EntityReference(item.getId(), item.getName(), item.getCountry().getName()));
+      add(
+          groups,
+          key,
+          new EntityReference(item.getId(), item.getName(), item.getCountry().getName()));
     }
     return candidates(ResourceType.LEAGUE, groups, "Same country and canonicalized league name");
   }
@@ -84,9 +91,13 @@ public class MasterDataReconciliationService {
     Map<String, List<EntityReference>> groups = new TreeMap<>();
     for (Team item : teams.findAll()) {
       String key =
-          item.getCountry().getId() + "|"
+          item.getCountry().getId()
+              + "|"
               + ProviderDataStandardizer.teamMatchKey(item.getName());
-      add(groups, key, new EntityReference(item.getId(), item.getName(), item.getCountry().getName()));
+      add(
+          groups,
+          key,
+          new EntityReference(item.getId(), item.getName(), item.getCountry().getName()));
     }
     return candidates(ResourceType.TEAM, groups, "Same country and canonicalized team name");
   }
@@ -97,7 +108,8 @@ public class MasterDataReconciliationService {
       if (item.getCountryCode() == null || item.getCountryCode().isBlank()) continue;
       String key =
           item.getCountryCode().trim().toUpperCase(Locale.ROOT)
-              + "|" + ProviderDataStandardizer.playerMatchKey(item.getName());
+              + "|"
+              + ProviderDataStandardizer.playerMatchKey(item.getName());
       add(
           groups,
           key,

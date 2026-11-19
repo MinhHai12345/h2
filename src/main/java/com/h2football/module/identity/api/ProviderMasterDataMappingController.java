@@ -43,7 +43,10 @@ public class ProviderMasterDataMappingController {
             .map(
                 item ->
                     new MappingCommand(
-                        item.provider(), item.resourceType(), item.externalId(), item.canonicalId()))
+                        item.provider(),
+                        item.resourceType(),
+                        item.externalId(),
+                        item.canonicalId()))
             .toList());
   }
 

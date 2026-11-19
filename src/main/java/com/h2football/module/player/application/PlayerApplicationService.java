@@ -53,7 +53,6 @@ public class PlayerApplicationService {
     return canonical.getId();
   }
 
-
   public record PlayerInput(
       String name,
       String shortName,

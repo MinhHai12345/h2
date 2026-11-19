@@ -47,7 +47,8 @@ public final class ProviderDataStandardizer {
           Map.entry("interceptions", "interceptions"),
           Map.entry("clearances", "clearances"));
 
-  private static final Map<String, String> TEAM_NAME_ALIASES = Map.ofEntries(
+  private static final Map<String, String> TEAM_NAME_ALIASES =
+      Map.ofEntries(
           Map.entry("1. FC Heidenheim 1846", "Heidenheim"),
           Map.entry("FC Heidenheim", "Heidenheim"),
           Map.entry("1. FC Köln", "FC Köln"),
@@ -538,18 +539,19 @@ public final class ProviderDataStandardizer {
           Map.entry("Millwall FC", "Millwall"),
           Map.entry("Norwich City FC", "Norwich City"),
           Map.entry("Portsmouth FC", "Portsmouth"),
-          Map.entry("Nimes", "Nîmes")
-  );
+          Map.entry("Nimes", "Nîmes"));
 
   private static final Map<String, String> TEAM_NAME_ALIASES_BY_KEY =
       TEAM_NAME_ALIASES.entrySet().stream()
           .collect(
               java.util.stream.Collectors.toUnmodifiableMap(
-                  entry -> teamAliasKey(entry.getKey()), Map.Entry::getValue, (first, second) -> second));
+                  entry -> teamAliasKey(entry.getKey()),
+                  Map.Entry::getValue,
+                  (first, second) -> second));
 
   private static final java.util.Set<String> TEAM_NAME_DESIGNATORS =
-      java.util.Set.of("fc", "afc", "cf", "sc", "ac", "as", "sv", "fk", "sk", "club", "football", "soccer");
-
+      java.util.Set.of(
+          "fc", "afc", "cf", "sc", "ac", "as", "sv", "fk", "sk", "club", "football", "soccer");
 
   private ProviderDataStandardizer() {}
 
@@ -588,10 +590,14 @@ public final class ProviderDataStandardizer {
   public static String teamName(String sourceName) {
     String cleaned = clean(sourceName);
     if (cleaned == null) return null;
-    return TEAM_NAME_ALIASES_BY_KEY.getOrDefault(teamAliasKey(cleaned), normalizeTeamDisplay(cleaned));
+    return TEAM_NAME_ALIASES_BY_KEY.getOrDefault(
+        teamAliasKey(cleaned), normalizeTeamDisplay(cleaned));
   }
 
-  /** Folds accents and punctuation, ignores common club designators, and retains meaningful name tokens. */
+  /**
+   * Folds accents and punctuation, ignores common club designators, and retains meaningful name
+   * tokens.
+   */
   public static String teamMatchKey(String sourceName) {
     String canonicalName = teamName(sourceName);
     if (canonicalName == null) return "";
