@@ -178,6 +178,32 @@ public class CronJobApplicationService {
   }
 
   @Transactional
+  public void pauseGroup(String group) {
+    repository.findAll().stream()
+        .filter(job -> job.getJobGroup().equals(group))
+        .forEach(job -> {
+          try {
+            scheduler.pauseJob(key(job));
+            job.markPaused();
+            repository.save(job);
+          } catch (SchedulerException exception) {
+            throw new CronJobOperationException(
+                "Unable to pause cron job " + job.getJobName(), exception);
+          }
+        });
+  }
+
+  @Transactional
+  public void deleteGroupExcept(String group, Set<String> activeJobNames) {
+    repository.findAll().stream()
+        .filter(job -> job.getJobGroup().equals(group))
+        .filter(job -> !activeJobNames.contains(job.getJobName()))
+        .map(CronJob::getId)
+        .toList()
+        .forEach(this::delete);
+  }
+
+  @Transactional
   public boolean delete(Long id) {
     CronJob job = get(id);
     try {
