@@ -60,7 +60,7 @@ class CronJobApplicationServiceTest {
 
   @Test
   void rejectsUnknownJobClassBeforeRegistering() {
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository);
+    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
 
     assertThrows(
         IllegalArgumentException.class,
@@ -78,7 +78,7 @@ class CronJobApplicationServiceTest {
 
   @Test
   void rejectsInvalidCronExpression() {
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository);
+    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
 
     assertThrows(
         IllegalArgumentException.class,
@@ -106,7 +106,7 @@ class CronJobApplicationServiceTest {
     job.markPaused();
     when(repository.findById(7L)).thenReturn(Optional.of(job));
 
-    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository);
+    CronJobApplicationService service = new CronJobApplicationService(scheduler, repository, new ObjectMapper());
 
     assertThrows(CronJobOperationException.class, () -> service.triggerNow(7L, Map.of()));
     verify(scheduler, never()).triggerJob(any(org.quartz.JobKey.class), any(JobDataMap.class));
