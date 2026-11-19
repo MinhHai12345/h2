@@ -25,7 +25,4 @@ jobs:
           cache: maven
 
       - name: Run unit tests and check formatting
-        run: |
-          mvn --batch-mode --no-transfer-progress test spotless:apply
-          mvn --batch-mode --no-transfer-progress spotless:check
-          git diff -- src/main/java src/test/java
+        run: mvn --batch-mode --no-transfer-progress test spotless:check
