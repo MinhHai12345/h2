@@ -43,13 +43,17 @@ public class SofaScoreSeasonMatchSyncJob extends QuartzJobBean implements Interr
     try {
       var result = ingestionService.sync(tournamentId, sofaSeasonId, canonicalSeasonId);
       log.info(
-          "Completed SofaScore season synchronization: tournamentId={}, sofaSeasonId={}, discovered={}, created={}, updated={}, skipped={}, warnings={}",
+          "Completed SofaScore season synchronization: tournamentId={}, sofaSeasonId={}, discovered={}, created={}, updated={}, skipped={}, statistics={}, lineups={}, incidents={}, playerStatistics={}, warnings={}",
           tournamentId,
           sofaSeasonId,
           result.discoveredEvents(),
           result.createdMatches(),
           result.updatedMatches(),
           result.skippedEvents(),
+          result.matchDetails().statisticsSucceeded(),
+          result.matchDetails().lineupsSucceeded(),
+          result.matchDetails().incidentsSucceeded(),
+          result.matchDetails().playerStatisticsSucceeded(),
           result.warnings().size());
     } catch (RuntimeException exception) {
       log.error(

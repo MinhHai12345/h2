@@ -12,13 +12,17 @@ import org.junit.jupiter.api.Test;
 class SofaScoreSeasonMatchIngestionServiceTest {
   private SofaScoreMasterDataIngestionService masterData;
   private SofaScoreMatchIngestionService matches;
+  private SofaScoreMatchDetailIngestionService matchDetails;
   private SofaScoreSeasonMatchIngestionService service;
 
   @BeforeEach
   void setUp() {
     masterData = mock(SofaScoreMasterDataIngestionService.class);
     matches = mock(SofaScoreMatchIngestionService.class);
-    service = new SofaScoreSeasonMatchIngestionService(masterData, matches);
+    matchDetails = mock(SofaScoreMatchDetailIngestionService.class);
+    when(matchDetails.sync(org.mockito.ArgumentMatchers.anySet()))
+        .thenReturn(SofaScoreMatchDetailIngestionService.DetailSyncResult.empty());
+    service = new SofaScoreSeasonMatchIngestionService(masterData, matches, matchDetails);
   }
 
   @Test
@@ -45,6 +49,8 @@ class SofaScoreSeasonMatchIngestionServiceTest {
     assertThat(result.windows()).hasSize(2);
     assertThat(result.windows())
         .allSatisfy(window -> assertThat(window.pageLimitReached()).isFalse());
+    assertThat(result.matchDetails().matchesProcessed()).isZero();
+    org.mockito.Mockito.verify(matchDetails).sync(java.util.Set.of(1001L, 1002L));
   }
 
   @Test
