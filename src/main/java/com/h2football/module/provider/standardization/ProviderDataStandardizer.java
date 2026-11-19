@@ -80,6 +80,7 @@ public final class ProviderDataStandardizer {
           Map.entry("Milan", "AC Milan"),
           Map.entry("FC Internazionale Milano", "Inter"),
           Map.entry("Inter", "Inter"),
+          Map.entry("Inter Milan", "Inter"),
           Map.entry("Atalanta BC", "Atalanta"),
           Map.entry("Atalanta", "Atalanta"),
           Map.entry("Bologna FC 1909", "Bologna"),
