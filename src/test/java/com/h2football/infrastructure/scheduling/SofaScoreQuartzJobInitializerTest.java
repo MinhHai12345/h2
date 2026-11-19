@@ -1,29 +1,24 @@
 package com.h2football.infrastructure.scheduling;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import com.h2football.module.ingestion.scheduling.SofaScoreIngestionJobProperties;
 import com.h2football.module.ingestion.scheduling.SofaScoreSeasonMatchSyncJob;
-import java.util.Date;
+import com.h2football.module.operations.application.CronJobApplicationService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.quartz.JobDetail;
-import org.quartz.Scheduler;
-import org.quartz.Trigger;
+import org.quartz.JobDataMap;
 
 @ExtendWith(MockitoExtension.class)
 class SofaScoreQuartzJobInitializerTest {
-  @Mock private Scheduler scheduler;
+  @Mock private CronJobApplicationService cronJobs;
 
   @Test
-  void registersConfiguredSeasonAsUtcCronJob() throws Exception {
+  void registersConfiguredSeasonInPersistentCronJobRegistry() {
     SofaScoreIngestionJobProperties properties = new SofaScoreIngestionJobProperties();
     properties.setEnabled(true);
     properties.setCron("0 15 2 * * ?");
@@ -34,31 +29,36 @@ class SofaScoreQuartzJobInitializerTest {
     season.setCanonicalSeasonId(42);
     properties.setSeasons(java.util.List.of(season));
 
-    when(scheduler.checkExists(any(org.quartz.JobKey.class))).thenReturn(false);
-    SofaScoreQuartzJobInitializer initializer =
-        new SofaScoreQuartzJobInitializer(scheduler, properties);
+    new SofaScoreQuartzJobInitializer(properties, cronJobs).run(null);
 
-    initializer.run(null);
-
-    ArgumentCaptor<JobDetail> jobCaptor = ArgumentCaptor.forClass(JobDetail.class);
-    ArgumentCaptor<Trigger> triggerCaptor = ArgumentCaptor.forClass(Trigger.class);
-    verify(scheduler).scheduleJob(jobCaptor.capture(), triggerCaptor.capture());
-
-    JobDetail job = jobCaptor.getValue();
-    assertEquals(SofaScoreSeasonMatchSyncJob.class, job.getJobClass());
-    assertEquals(17L, job.getJobDataMap().getLongValue("tournamentId"));
-    assertEquals(52186L, job.getJobDataMap().getLongValue("sofaSeasonId"));
-    assertEquals(42L, job.getJobDataMap().getLongValue("canonicalSeasonId"));
-    assertEquals("sofascore-ingestion", triggerCaptor.getValue().getKey().getGroup());
+    org.mockito.ArgumentCaptor<JobDataMap> data =
+        org.mockito.ArgumentCaptor.forClass(JobDataMap.class);
+    verify(cronJobs)
+        .registerOrUpdate(
+            eq("season-17-52186"),
+            eq("sofascore-ingestion"),
+            eq(SofaScoreSeasonMatchSyncJob.class.getName()),
+            eq("0 15 2 * * ?"),
+            eq("Synchronize SofaScore teams and match snapshots for configured season"),
+            data.capture());
+    org.junit.jupiter.api.Assertions.assertEquals(
+        42L, data.getValue().getLongValue("canonicalSeasonId"));
   }
 
   @Test
-  void doesNotRegisterJobsWhenDisabled() throws Exception {
+  void doesNotRegisterJobsWhenDisabled() {
     SofaScoreIngestionJobProperties properties = new SofaScoreIngestionJobProperties();
     properties.setEnabled(false);
 
-    new SofaScoreQuartzJobInitializer(scheduler, properties).run(null);
+    new SofaScoreQuartzJobInitializer(properties, cronJobs).run(null);
 
-    verify(scheduler, never()).scheduleJob(any(JobDetail.class), any(Trigger.class));
+    verify(cronJobs, never())
+        .registerOrUpdate(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any());
   }
 }
